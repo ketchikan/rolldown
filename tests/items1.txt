@@ -1,0 +1,2 @@
+Tier Default 100:
+item Sword 100;
