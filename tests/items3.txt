@@ -1,0 +1,8 @@
+tier Legendary 3.5;
+item Sword 60;
+item Axe & item Sword 40;
+tier Rare 20;
+item Bow 50;
+item Shield 50;
+tier Common 76.5;
+item potion 100;

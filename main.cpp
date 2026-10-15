@@ -75,15 +75,24 @@ item Potion 100
 // TODO If I define the odds for individual items, should I be able to have the program organize them into the 'tiers' for me?
 // TODO For a game like Elden Ring, do I even need tiers?
 
+// TODO I just realized that there is the most important item of all; no item drop.
+// I need to figure out some way to determine if an item drops at all. I can easily do this by either not defining drops for an enemy, in which case we would return some value noting that they don't drop anything, or I define a NULL option of some kind so that there is a chance that we don't drop an item.
+
 // OPTIONAL PITY SYSTEM???
 // A pity system raises the chance after each miss.
 // Set a maximum number of misses after which the drop is guaranteed
 // If these exist, then I can publish the pity rules alongside the drop rates.
+// ! A pity system would require that I keep track of the number of 'attempts', like enemies killed or rolls made
+// - Because no item drop may also be an option, we want to define whether going off enemies killed or the number of items obtained from a solider will work.
+// - I would also want to either come up with these values myself or come up with some kind of 'pity policy': an equation to derive the number of rolls until I want to guarantee that a drop will occur if it has no already been obtained (or is not in inventory or something)
+
+// IMPLEMENTATION NOTES
+// - I can either store the percentages as the converted numbers in the txt files or do the conversion when we are saving the games. I think I would rather do the conversions in the program to make it easier to read and bug fix if it comes down to it.
 
 constexpr uint64_t TOTAL = 1'000'000;
 constexpr uint64_t TOTAL_PERCENT_WEIGHT = TOTAL / 100; // Should be 10,000 for a total of 1'000'000
 
-uint64_t calculateItemDropRate(const uint64_t &tierChance, const uint64_t &itemChance)
+uint64_t calculateItemDropRate(const uint64_t &tierChance, const float &itemChance)
 {
     return tierChance * itemChance / 100; // Should always be 100
 }
@@ -95,13 +104,12 @@ uint64_t convertRateToRange(const std::string &rate)
 
 void outputChances()
 {
-
-    std::string tier1Chance = "10";
-    std::string tier2Chance = "20";
+    std::string tier1Chance = "5.5";
+    std::string tier2Chance = "24.5";
     std::string tier3Chance = "70";
 
-    std::string tier1Item1 = "60";
-    std::string tier1Item2 = "40";
+    std::string tier1Item1 = "5.5";
+    std::string tier1Item2 = "94.5";
 
     std::string tier2Item1 = "60";
     std::string tier2Item2 = "40";
@@ -110,17 +118,17 @@ void outputChances()
     std::string tier3Item2 = "40";
 
     // Convert Tier 1 chance into the integer
-    uint64_t tier1ChanceConverted = convertRateToRange(tier1Chance); // Should be 100,000
-    uint64_t tier2ChanceConverted = convertRateToRange(tier2Chance); // Should be 100,000
-    uint64_t tier3ChanceConverted = convertRateToRange(tier3Chance); // Should be 100,000
+    uint64_t tier1ChanceConverted = convertRateToRange(tier1Chance);
+    uint64_t tier2ChanceConverted = convertRateToRange(tier2Chance);
+    uint64_t tier3ChanceConverted = convertRateToRange(tier3Chance);
 
     // Convert each of the tier items
-    uint64_t tier1Item1Converted = std::stoi(tier1Item1);
-    uint64_t tier1Item2Converted = std::stoi(tier1Item2);
-    uint64_t tier2Item1Converted = std::stoi(tier2Item1);
-    uint64_t tier2Item2Converted = std::stoi(tier2Item2);
-    uint64_t tier3Item1Converted = std::stoi(tier3Item1);
-    uint64_t tier3Item2Converted = std::stoi(tier3Item2);
+    float tier1Item1Converted = std::stof(tier1Item1);
+    float tier1Item2Converted = std::stof(tier1Item2);
+    float tier2Item1Converted = std::stof(tier2Item1);
+    float tier2Item2Converted = std::stof(tier2Item2);
+    float tier3Item1Converted = std::stof(tier3Item1);
+    float tier3Item2Converted = std::stof(tier3Item2);
 
     uint64_t tier1Item1Range = calculateItemDropRate(tier1ChanceConverted, tier1Item1Converted);
     uint64_t tier1Item2Range = calculateItemDropRate(tier1ChanceConverted, tier1Item2Converted);
@@ -129,12 +137,27 @@ void outputChances()
     uint64_t tier3Item1Range = calculateItemDropRate(tier3ChanceConverted, tier3Item1Converted);
     uint64_t tier3Item2Range = calculateItemDropRate(tier3ChanceConverted, tier3Item2Converted);
 
-    std::cout << "Item number 1 drop chance: " << tier1Item1Range << "%" << std::endl;
-    std::cout << "Item number 2 drop chance: " << tier1Item2Range << "%" << std::endl;
-    std::cout << "Item number 3 drop chance: " << tier2Item1Range << "%" << std::endl;
-    std::cout << "Item number 4 drop chance: " << tier2Item2Range << "%" << std::endl;
-    std::cout << "Item number 5 drop chance: " << tier3Item1Range << "%" << std::endl;
-    std::cout << "Item number 6 drop chance: " << tier3Item2Range << "%" << std::endl;
+    // Now I need some way of noting the correct cutoff values per item.
+    // CUTOFF: Starting from the highest chance to the lowest, I need to keep track of the current running total. The cutoff value will add up all the item range values as it goes along.
+    uint64_t currentCutoff = 0;
+
+    currentCutoff += tier1Item1Range;
+    std::cout << "Item number 1 drop range: " << currentCutoff << std::endl;
+
+    currentCutoff += tier1Item2Range;
+    std::cout << "Item number 2 drop range: " << currentCutoff << std::endl;
+
+    currentCutoff += tier2Item1Range;
+    std::cout << "Item number 3 drop range: " << currentCutoff << std::endl;
+
+    currentCutoff += tier2Item2Range;
+    std::cout << "Item number 4 drop range: " << currentCutoff << std::endl;
+
+    currentCutoff += tier3Item1Range;
+    std::cout << "Item number 5 drop range: " << currentCutoff << std::endl;
+
+    currentCutoff += tier3Item2Range;
+    std::cout << "Item number 6 drop range: " << currentCutoff << std::endl;
 
     std::cout << "Total: " << tier1Item1Range + tier1Item2Range + tier2Item1Range + tier2Item2Range + tier3Item1Range + tier3Item2Range << std::endl;
 }
