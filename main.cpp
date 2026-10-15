@@ -25,13 +25,6 @@
 // SHARE
 // An integer that sets the chance of an item inside its tier.
 
-// Use only integers for weights and cutoffs to avoid floating point problems
-// Set Total to something like 1,000,000 (this should give us plenty of precision)
-// Convert percentage to weight: weight = percent * 10,000
-// All tier weights should add to Total
-// All item shares in each tier have a sum greater than 0
-// Roll on the server only (for single player you will roll on the device)
-
 // INTERFACE WITH A CONFIG FILE
 // Some file will be defined something like this:
 /*
@@ -55,20 +48,6 @@ item Potion 100
 // Make a list of all items in order, from rarest to most common
 // Calculate the cumulative cutoff for each item
 // Store the list
-
-// LATER I WANT TO BE ABLE TO GRAB THE LIST from some arbitrary binary format, like attached to an enemy type, and have it perform the calculation quickly.
-// TODO Is there a way to do this calculation branchless? That's the end goal is to do it with as few comparisons as possible, which should be good for performance and inlining the code.
-// TODO I want to turn all divides into multiplications where possible
-// TODO Instead of total being something like 1 million, I want to see if I can get it to a power of 2 for easier bit shifting math operations.
-
-// Roll procedure
-// Get a random integer from 0 to Total - 1
-// Find the first item where roll < cutoff
-// Give that item(s) to the player.
-
-// ! DO NOT USE MODULO as that will favor smaller numbers
-// Instead maybe bitmasking?
-// TODO I can also use a bounded-integer function from the randomization library
 
 // TODO CHECKS TO PERFORM (when compiling or rolling)
 // The tier weights add up to Total
@@ -95,10 +74,6 @@ item Potion 100
 
 // IMPLEMENTATION NOTES
 // - I can either store the percentages as the converted numbers in the txt files or do the conversion when we are saving the games. I think I would rather do the conversions in the program to make it easier to read and bug fix if it comes down to it.
-
-// constexpr uint64_t PERCENT_SCALE = 100;                               // two decimal places: "5.5" -> 550
-// constexpr uint64_t ONE_HUNDRED_PERCENT = 100 * PERCENT_SCALE;         // 10'000
-// constexpr uint64_t TOTAL = ONE_HUNDRED_PERCENT * ONE_HUNDRED_PERCENT; // 100'000'000
 
 constexpr int ROLLS = 100'000'000;
 
@@ -193,37 +168,41 @@ void outputChances()
 
     int chosenItemIdx = 0;
 
-    // METHOD 1
+    // // METHOD 1
+    // std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
+    // for (int i = 0; i < ROLLS; i++)
+    // {
+    //     chosenItemIdx = selectRandomDropItemIndex(cutoffs);
+    //     count.at(chosenItemIdx) += 1;
+    // }
+    // auto end = std::chrono::high_resolution_clock::now();
+    // auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    // std::cout << duration << " microseconds\n";
+
+    // // METHOD 2
+    // start = std::chrono::high_resolution_clock::now();
+    // std::vector<int> itemIndexes = selectNRandomDropItemIndexes(cutoffs, ROLLS);
+    // end = std::chrono::high_resolution_clock::now();
+    // duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    // std::cout << duration << " microseconds\n";
+
+    // // METHOD 3
+    // start = std::chrono::high_resolution_clock::now();
+    // std::vector<int> itemIndexes2;
+    // ALTselectNRandomDropItemIndexes(cutoffs, itemIndexes2, ROLLS);
+    // end = std::chrono::high_resolution_clock::now();
+    // duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    // std::cout << duration << " microseconds\n";
+
+    // METHOD 4: BOUNDED
     std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < ROLLS; i++)
     {
-        chosenItemIdx = selectRandomDropItemIndex(cutoffs);
+        chosenItemIdx = BOUNDEDselectRandomDropItemIndex(cutoffs);
         count.at(chosenItemIdx) += 1;
     }
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-    std::cout << duration << " microseconds\n";
-
-    // METHOD 2
-    start = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < ROLLS; i++)
-    {
-        chosenItemIdx = BRANCHLESSselectRandomDropItemIndex(cutoffs);
-        count.at(chosenItemIdx) += 1;
-    }
-    end = std::chrono::high_resolution_clock::now();
-    duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-    std::cout << duration << " microseconds\n";
-
-    // METHOD 3
-    start = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < ROLLS; i++)
-    {
-        chosenItemIdx = BINARYselectRandomDropItemIndex(cutoffs);
-        count.at(chosenItemIdx) += 1;
-    }
-    end = std::chrono::high_resolution_clock::now();
-    duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::cout << duration << " microseconds\n";
 
     // uint64_t previousCutoff = 0;
