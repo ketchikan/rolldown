@@ -1,2 +1,7 @@
-Tier Default 100:
-item Sword 100;
+Character 1
+{
+    Tier Default 100
+    {
+        Item Sword 100;
+    }
+}

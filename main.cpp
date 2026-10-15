@@ -1,6 +1,10 @@
 #include <iostream>
 #include <string>
 #include <numeric>
+#include <fstream>
+#include <cstdlib>
+
+#include "dropChanceCalc.hpp"
 
 // A system for selecting loot drops while preserving specific drop ratios.
 // An implementation/modification to roll down loot drop methodology
@@ -140,30 +144,79 @@ void outputChances()
     // Now I need some way of noting the correct cutoff values per item.
     // CUTOFF: Starting from the highest chance to the lowest, I need to keep track of the current running total. The cutoff value will add up all the item range values as it goes along.
     uint64_t currentCutoff = 0;
+    std::vector<uint64_t> cutoffs;
 
     currentCutoff += tier1Item1Range;
-    std::cout << "Item number 1 drop range: " << currentCutoff << std::endl;
+    cutoffs.emplace_back(currentCutoff);
 
     currentCutoff += tier1Item2Range;
-    std::cout << "Item number 2 drop range: " << currentCutoff << std::endl;
+    cutoffs.emplace_back(currentCutoff);
 
     currentCutoff += tier2Item1Range;
-    std::cout << "Item number 3 drop range: " << currentCutoff << std::endl;
+    cutoffs.emplace_back(currentCutoff);
 
     currentCutoff += tier2Item2Range;
-    std::cout << "Item number 4 drop range: " << currentCutoff << std::endl;
+    cutoffs.emplace_back(currentCutoff);
 
     currentCutoff += tier3Item1Range;
-    std::cout << "Item number 5 drop range: " << currentCutoff << std::endl;
+    cutoffs.emplace_back(currentCutoff);
 
     currentCutoff += tier3Item2Range;
-    std::cout << "Item number 6 drop range: " << currentCutoff << std::endl;
+    cutoffs.emplace_back(currentCutoff);
 
-    std::cout << "Total: " << tier1Item1Range + tier1Item2Range + tier2Item1Range + tier2Item2Range + tier3Item1Range + tier3Item2Range << std::endl;
+    std::cout << "Total: " << currentCutoff << std::endl;
+
+    int chosenItemIdx = 0;
+    for (int i = 0; i < 100; i++)
+    {
+        chosenItemIdx = selectRandomDropItemIndex(cutoffs, TOTAL);
+        std::cout << "Random index chosen: " << chosenItemIdx << std::endl;
+    }
 }
+
+std::ifstream getFileStream(const std::string_view &filepath)
+{
+    // Open the file
+    std::ifstream in(filepath);
+    if (!in)
+    {
+        std::cerr << "FILE NOT FOUND: " << filepath << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+    return in;
+}
+
+void parseCharacter(std::ifstream &fs)
+{
+    // Iterate through the file in 'scopes'.
+    // Each scope starts with a Character tag and finishes with a RBRACE
+    std::string line;
+    while (std::getline(fs, line))
+    {
+        // TODO VALIDATE INPUT AS WE GO
+        // Starting a CHARACTER scope. Validate.
+        if (!line.starts_with("Character"))
+        {
+            // Bad formatting: Doesn't start with Character
+        }
+    }
+    // End of the file or wrong format
+}
+
+void closeFileStream(std::ifstream &fs)
+{
+    fs.close();
+    return;
+}
+
+// I don't know why it took me so long to realize but this is technically a good use case for JSON. Hmm. I'm going to ignore that, this is more fun anyways.
 
 int main()
 {
+    std::ifstream fs = getFileStream("tests/items1.txt");
+    // TODO Do things
+    closeFileStream(fs);
+
     outputChances();
     return 0;
 }

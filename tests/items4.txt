@@ -1,0 +1,23 @@
+Character 1;
+Tier Default 100:
+item Sword 100;
+
+Character 2;
+tier Legendary 3.5;
+item Sword 60;
+item Axe 40;
+tier Rare 20;
+item Bow 50;
+item Shield 50;
+tier Common 76.5;
+item potion 100;
+
+Character 3;
+tier Legendary 3.5;
+item Sword 60;
+item Axe & item Sword 40;
+tier Rare 20;
+item Bow 50;
+item Shield 50;
+tier Common 76.5;
+item potion 100;
