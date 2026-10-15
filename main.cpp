@@ -58,6 +58,7 @@ void outputChances(const std::vector<uint64_t> &cutoffs)
     std::chrono::time_point<std::chrono::high_resolution_clock> start;
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::vector<int> itemIndexes;
 
     // METHOD 1
     start = std::chrono::high_resolution_clock::now();
@@ -71,18 +72,19 @@ void outputChances(const std::vector<uint64_t> &cutoffs)
 
     // METHOD 2
     start = std::chrono::high_resolution_clock::now();
-    std::vector<int> itemIndexes = selectNRandomDropItemIndexes(cutoffs, ROLLS);
+    itemIndexes = selectNRandomDropItemIndexes(cutoffs, ROLLS);
     end = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::cout << duration << " microseconds\n";
+    itemIndexes.clear();
 
     // METHOD 3
     start = std::chrono::high_resolution_clock::now();
-    std::vector<int> itemIndexes2;
-    ALTselectNRandomDropItemIndexes(cutoffs, itemIndexes2, ROLLS);
+    ALTselectNRandomDropItemIndexes(cutoffs, itemIndexes, ROLLS);
     end = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::cout << duration << " microseconds\n";
+    itemIndexes.clear();
 
     // METHOD 4: BOUNDED
     start = std::chrono::high_resolution_clock::now();
@@ -93,21 +95,50 @@ void outputChances(const std::vector<uint64_t> &cutoffs)
     end = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::cout << duration << " microseconds\n";
+    itemIndexes.clear();
 
     // METHOD 5
     start = std::chrono::high_resolution_clock::now();
-    std::vector<int> itemIndexes3 = BOUNDEDselectNRandomDropItemIndexes(cutoffs, ROLLS);
+    itemIndexes = BOUNDEDselectNRandomDropItemIndexes(cutoffs, ROLLS);
     end = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::cout << duration << " microseconds\n";
+    itemIndexes.clear();
 
     // METHOD 6
     start = std::chrono::high_resolution_clock::now();
-    std::vector<int> itemIndexes4;
-    BOUNDEDALTselectNRandomDropItemIndexes(cutoffs, itemIndexes4, ROLLS);
+    BOUNDEDALTselectNRandomDropItemIndexes(cutoffs, itemIndexes, ROLLS);
     end = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::cout << duration << " microseconds\n";
+    itemIndexes.clear();
+
+    // METHOD 7
+    start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < ROLLS; i++)
+    {
+        chosenItemIdx = XOSHIROselectRandomDropItemIndex(cutoffs);
+    }
+    end = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << duration << " microseconds\n";
+    itemIndexes.clear();
+
+    // METHOD 8
+    start = std::chrono::high_resolution_clock::now();
+    itemIndexes = XOSHIROselectNRandomDropItemIndexes(cutoffs, ROLLS);
+    end = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << duration << " microseconds\n";
+    itemIndexes.clear();
+
+    // METHOD 9
+    start = std::chrono::high_resolution_clock::now();
+    XOSHIROALTselectNRandomDropItemIndexes(cutoffs, itemIndexes, ROLLS);
+    end = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << duration << " microseconds\n";
+    itemIndexes.clear();
 }
 
 int main()

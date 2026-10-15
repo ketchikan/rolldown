@@ -14,8 +14,10 @@ constexpr uint64_t ONE_HUNDRED_PERCENT = 100 * PERCENT_SCALE;         // 10'000
 constexpr uint64_t TOTAL = ONE_HUNDRED_PERCENT * ONE_HUNDRED_PERCENT; // 100'000'000
 
 static std::random_device rd;
-static std::mt19937 gen(rd());
+static std::mt19937_64 gen(rd());
 static std::uniform_int_distribution<uint64_t> distrib(0, TOTAL - 1);
+
+static xoshiro256pp xoRandomGen(gen());
 
 // CUTOFF PROPERTIES
 // The `cutoff` vector is in ascending order (lowest to highest)
@@ -138,6 +140,62 @@ void BOUNDEDALTselectNRandomDropItemIndexes(const std::vector<uint64_t> &cutoffs
     for (int i = 0; i < numRolls; ++i)
     {
         roll = boundedRandom(TOTAL);
+        for (int j = 0; j < cutoffs.size(); j++)
+        {
+            if (roll < cutoffs.at(j))
+            {
+                // Return the index of the item we hit the cutoff for
+                rollResults.emplace_back(j);
+                break;
+            }
+        }
+    }
+    return;
+}
+
+int XOSHIROselectRandomDropItemIndex(const std::vector<uint64_t> &cutoffs)
+{
+    // Get a random number from (0, TOTAL-1)
+    uint64_t roll = distrib(xoRandomGen);
+
+    for (int i = 0; i < cutoffs.size(); i++)
+    {
+        if (roll < cutoffs.at(i))
+        {
+            // Return the index of the item we hit the cutoff for
+            return i;
+        }
+    }
+    // Fallback
+    return cutoffs.size() - 1;
+}
+
+std::vector<int> XOSHIROselectNRandomDropItemIndexes(const std::vector<uint64_t> &cutoffs, const size_t &numRolls)
+{
+    std::vector<int> rollResults;
+    uint64_t roll = 0;
+    for (int i = 0; i < numRolls; ++i)
+    {
+        roll = distrib(xoRandomGen);
+        for (int j = 0; j < cutoffs.size(); j++)
+        {
+            if (roll < cutoffs.at(j))
+            {
+                // Return the index of the item we hit the cutoff for
+                rollResults.emplace_back(j);
+                break;
+            }
+        }
+    }
+    return rollResults;
+}
+
+void XOSHIROALTselectNRandomDropItemIndexes(const std::vector<uint64_t> &cutoffs, std::vector<int> &rollResults, const size_t &numRolls)
+{
+    uint64_t roll = 0;
+    for (int i = 0; i < numRolls; ++i)
+    {
+        roll = distrib(xoRandomGen);
         for (int j = 0; j < cutoffs.size(); j++)
         {
             if (roll < cutoffs.at(j))
