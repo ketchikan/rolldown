@@ -6,7 +6,6 @@
 
 #include "xoshiro.hpp"
 
-// TODO Benchmark the BoundedRandom
 // TODO Benchmark xoshiro256++
 // TODO Benchmark PCG64
 
