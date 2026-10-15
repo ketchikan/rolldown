@@ -3,6 +3,7 @@
 #include <numeric>
 #include <fstream>
 #include <cstdlib>
+#include <cmath>
 
 #include "dropChanceCalc.hpp"
 
@@ -93,17 +94,20 @@ item Potion 100
 // IMPLEMENTATION NOTES
 // - I can either store the percentages as the converted numbers in the txt files or do the conversion when we are saving the games. I think I would rather do the conversions in the program to make it easier to read and bug fix if it comes down to it.
 
-constexpr uint64_t TOTAL = 1'000'000;
-constexpr uint64_t TOTAL_PERCENT_WEIGHT = TOTAL / 100; // Should be 10,000 for a total of 1'000'000
+constexpr uint64_t PERCENT_SCALE = 100;                               // two decimal places: "5.5" -> 550
+constexpr uint64_t ONE_HUNDRED_PERCENT = 100 * PERCENT_SCALE;         // 10'000
+constexpr uint64_t TOTAL = ONE_HUNDRED_PERCENT * ONE_HUNDRED_PERCENT; // 100'000'000
 
-uint64_t calculateItemDropRate(const uint64_t &tierChance, const float &itemChance)
+constexpr int ROLLS = 1'000'000;
+
+uint64_t calculateItemDropRate(const uint64_t &tierChance, const uint64_t &itemChance)
 {
-    return tierChance * itemChance / 100; // Should always be 100
+    return tierChance * itemChance;
 }
 
 uint64_t convertRateToRange(const std::string &rate)
 {
-    return std::stof(rate) * TOTAL_PERCENT_WEIGHT;
+    return std::llround(std::stod(rate) * PERCENT_SCALE); // "5.5" -> 550, "24.5" -> 2450
 }
 
 void outputChances()
@@ -126,13 +130,13 @@ void outputChances()
     uint64_t tier2ChanceConverted = convertRateToRange(tier2Chance);
     uint64_t tier3ChanceConverted = convertRateToRange(tier3Chance);
 
-    // Convert each of the tier items
-    float tier1Item1Converted = std::stof(tier1Item1);
-    float tier1Item2Converted = std::stof(tier1Item2);
-    float tier2Item1Converted = std::stof(tier2Item1);
-    float tier2Item2Converted = std::stof(tier2Item2);
-    float tier3Item1Converted = std::stof(tier3Item1);
-    float tier3Item2Converted = std::stof(tier3Item2);
+    // Convert each of the tier items (same scale as the tiers: "5.5" -> 550)
+    uint64_t tier1Item1Converted = convertRateToRange(tier1Item1);
+    uint64_t tier1Item2Converted = convertRateToRange(tier1Item2);
+    uint64_t tier2Item1Converted = convertRateToRange(tier2Item1);
+    uint64_t tier2Item2Converted = convertRateToRange(tier2Item2);
+    uint64_t tier3Item1Converted = convertRateToRange(tier3Item1);
+    uint64_t tier3Item2Converted = convertRateToRange(tier3Item2);
 
     uint64_t tier1Item1Range = calculateItemDropRate(tier1ChanceConverted, tier1Item1Converted);
     uint64_t tier1Item2Range = calculateItemDropRate(tier1ChanceConverted, tier1Item2Converted);
@@ -145,32 +149,68 @@ void outputChances()
     // CUTOFF: Starting from the highest chance to the lowest, I need to keep track of the current running total. The cutoff value will add up all the item range values as it goes along.
     uint64_t currentCutoff = 0;
     std::vector<uint64_t> cutoffs;
+    std::vector<size_t> count;
 
     currentCutoff += tier1Item1Range;
     cutoffs.emplace_back(currentCutoff);
+    count.emplace_back(0);
+
+    std::cout << currentCutoff << std::endl;
 
     currentCutoff += tier1Item2Range;
     cutoffs.emplace_back(currentCutoff);
+    count.emplace_back(0);
+
+    std::cout << currentCutoff << std::endl;
 
     currentCutoff += tier2Item1Range;
     cutoffs.emplace_back(currentCutoff);
+    count.emplace_back(0);
+
+    std::cout << currentCutoff << std::endl;
 
     currentCutoff += tier2Item2Range;
     cutoffs.emplace_back(currentCutoff);
+    count.emplace_back(0);
+
+    std::cout << currentCutoff << std::endl;
 
     currentCutoff += tier3Item1Range;
     cutoffs.emplace_back(currentCutoff);
+    count.emplace_back(0);
+
+    std::cout << currentCutoff << std::endl;
 
     currentCutoff += tier3Item2Range;
     cutoffs.emplace_back(currentCutoff);
+    count.emplace_back(0);
+
+    std::cout << currentCutoff << std::endl;
 
     std::cout << "Total: " << currentCutoff << std::endl;
 
     int chosenItemIdx = 0;
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < ROLLS; i++)
     {
         chosenItemIdx = selectRandomDropItemIndex(cutoffs, TOTAL);
-        std::cout << "Random index chosen: " << chosenItemIdx << std::endl;
+        count.at(chosenItemIdx) += 1;
+    }
+
+    uint64_t previousCutoff = 0;
+    for (size_t i = 0; i < count.size(); i++)
+    {
+        // The item's slice of the range is the gap between its cutoff and the previous one
+        const uint64_t itemRange = cutoffs.at(i) - previousCutoff;
+        previousCutoff = cutoffs.at(i);
+
+        const double observed = 100.0 * static_cast<double>(count.at(i)) / ROLLS;
+        const double expected = 100.0 * static_cast<double>(itemRange) / TOTAL;
+
+        std::cout << std::fixed << std::setprecision(4)
+                  << "Item " << i << " chosen: " << count.at(i)
+                  << ", Observed: " << observed << "%"
+                  << ", Expected: " << expected << "%"
+                  << std::endl;
     }
 }
 

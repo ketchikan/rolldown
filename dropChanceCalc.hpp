@@ -21,5 +21,5 @@ int selectRandomDropItemIndex(const std::vector<uint64_t> &cutoffs, const uint64
         }
     }
     // Fallback
-    return cutoffs.size();
+    return cutoffs.size() - 1;
 }
