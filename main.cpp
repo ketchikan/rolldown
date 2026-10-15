@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <numeric>
 
 // A system for selecting loot drops while preserving specific drop ratios.
 // An implementation/modification to roll down loot drop methodology
@@ -78,16 +79,23 @@ item Potion 100
 // A pity system raises the chance after each miss.
 // Set a maximum number of misses after which the drop is guaranteed
 // If these exist, then I can publish the pity rules alongside the drop rates.
-float dropChance(const int &tierChance, const int &itemChance)
-{
-    // Convert the tier chance and the item chance
 
-    return tierChance * itemChance / 100;
+constexpr uint64_t TOTAL = 1'000'000;
+constexpr uint64_t TOTAL_PERCENT_WEIGHT = TOTAL / 100; // Should be 10,000 for a total of 1'000'000
+
+uint64_t calculateItemDropRate(const uint64_t &tierChance, const uint64_t &itemChance)
+{
+    return tierChance * itemChance / 100; // Should always be 100
+}
+
+uint64_t convertRateToRange(const std::string &rate)
+{
+    return std::stof(rate) * TOTAL_PERCENT_WEIGHT;
 }
 
 void outputChances()
 {
-    //
+
     std::string tier1Chance = "10";
     std::string tier2Chance = "20";
     std::string tier3Chance = "70";
@@ -101,12 +109,34 @@ void outputChances()
     std::string tier3Item1 = "60";
     std::string tier3Item2 = "40";
 
-    std::cout << "Item number 1 drop chance: " << dropChance(std::stoi(tier1Chance), std::stoi(tier1Item1)) << "%" << std::endl;
-    std::cout << "Item number 2 drop chance: " << dropChance(std::stoi(tier1Chance), std::stoi(tier1Item2)) << "%" << std::endl;
-    std::cout << "Item number 3 drop chance: " << dropChance(std::stoi(tier2Chance), std::stoi(tier2Item1)) << "%" << std::endl;
-    std::cout << "Item number 4 drop chance: " << dropChance(std::stoi(tier2Chance), std::stoi(tier2Item2)) << "%" << std::endl;
-    std::cout << "Item number 5 drop chance: " << dropChance(std::stoi(tier3Chance), std::stoi(tier3Item1)) << "%" << std::endl;
-    std::cout << "Item number 6 drop chance: " << dropChance(std::stoi(tier3Chance), std::stoi(tier3Item2)) << "%" << std::endl;
+    // Convert Tier 1 chance into the integer
+    uint64_t tier1ChanceConverted = convertRateToRange(tier1Chance); // Should be 100,000
+    uint64_t tier2ChanceConverted = convertRateToRange(tier2Chance); // Should be 100,000
+    uint64_t tier3ChanceConverted = convertRateToRange(tier3Chance); // Should be 100,000
+
+    // Convert each of the tier items
+    uint64_t tier1Item1Converted = std::stoi(tier1Item1);
+    uint64_t tier1Item2Converted = std::stoi(tier1Item2);
+    uint64_t tier2Item1Converted = std::stoi(tier2Item1);
+    uint64_t tier2Item2Converted = std::stoi(tier2Item2);
+    uint64_t tier3Item1Converted = std::stoi(tier3Item1);
+    uint64_t tier3Item2Converted = std::stoi(tier3Item2);
+
+    uint64_t tier1Item1Range = calculateItemDropRate(tier1ChanceConverted, tier1Item1Converted);
+    uint64_t tier1Item2Range = calculateItemDropRate(tier1ChanceConverted, tier1Item2Converted);
+    uint64_t tier2Item1Range = calculateItemDropRate(tier2ChanceConverted, tier2Item1Converted);
+    uint64_t tier2Item2Range = calculateItemDropRate(tier2ChanceConverted, tier2Item2Converted);
+    uint64_t tier3Item1Range = calculateItemDropRate(tier3ChanceConverted, tier3Item1Converted);
+    uint64_t tier3Item2Range = calculateItemDropRate(tier3ChanceConverted, tier3Item2Converted);
+
+    std::cout << "Item number 1 drop chance: " << tier1Item1Range << "%" << std::endl;
+    std::cout << "Item number 2 drop chance: " << tier1Item2Range << "%" << std::endl;
+    std::cout << "Item number 3 drop chance: " << tier2Item1Range << "%" << std::endl;
+    std::cout << "Item number 4 drop chance: " << tier2Item2Range << "%" << std::endl;
+    std::cout << "Item number 5 drop chance: " << tier3Item1Range << "%" << std::endl;
+    std::cout << "Item number 6 drop chance: " << tier3Item2Range << "%" << std::endl;
+
+    std::cout << "Total: " << tier1Item1Range + tier1Item2Range + tier2Item1Range + tier2Item2Range + tier3Item1Range + tier3Item2Range << std::endl;
 }
 
 int main()
