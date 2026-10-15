@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <cmath>
 
+#include <chrono>
+
 #include "dropChanceCalc.hpp"
 
 // A system for selecting loot drops while preserving specific drop ratios.
@@ -94,11 +96,11 @@ item Potion 100
 // IMPLEMENTATION NOTES
 // - I can either store the percentages as the converted numbers in the txt files or do the conversion when we are saving the games. I think I would rather do the conversions in the program to make it easier to read and bug fix if it comes down to it.
 
-constexpr uint64_t PERCENT_SCALE = 100;                               // two decimal places: "5.5" -> 550
-constexpr uint64_t ONE_HUNDRED_PERCENT = 100 * PERCENT_SCALE;         // 10'000
-constexpr uint64_t TOTAL = ONE_HUNDRED_PERCENT * ONE_HUNDRED_PERCENT; // 100'000'000
+// constexpr uint64_t PERCENT_SCALE = 100;                               // two decimal places: "5.5" -> 550
+// constexpr uint64_t ONE_HUNDRED_PERCENT = 100 * PERCENT_SCALE;         // 10'000
+// constexpr uint64_t TOTAL = ONE_HUNDRED_PERCENT * ONE_HUNDRED_PERCENT; // 100'000'000
 
-constexpr int ROLLS = 1'000'000;
+constexpr int ROLLS = 100'000'000;
 
 uint64_t calculateItemDropRate(const uint64_t &tierChance, const uint64_t &itemChance)
 {
@@ -190,28 +192,56 @@ void outputChances()
     std::cout << "Total: " << currentCutoff << std::endl;
 
     int chosenItemIdx = 0;
+
+    // METHOD 1
+    std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < ROLLS; i++)
     {
-        chosenItemIdx = selectRandomDropItemIndex(cutoffs, TOTAL);
+        chosenItemIdx = selectRandomDropItemIndex(cutoffs);
         count.at(chosenItemIdx) += 1;
     }
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << duration << " microseconds\n";
 
-    uint64_t previousCutoff = 0;
-    for (size_t i = 0; i < count.size(); i++)
+    // METHOD 2
+    start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < ROLLS; i++)
     {
-        // The item's slice of the range is the gap between its cutoff and the previous one
-        const uint64_t itemRange = cutoffs.at(i) - previousCutoff;
-        previousCutoff = cutoffs.at(i);
-
-        const double observed = 100.0 * static_cast<double>(count.at(i)) / ROLLS;
-        const double expected = 100.0 * static_cast<double>(itemRange) / TOTAL;
-
-        std::cout << std::fixed << std::setprecision(4)
-                  << "Item " << i << " chosen: " << count.at(i)
-                  << ", Observed: " << observed << "%"
-                  << ", Expected: " << expected << "%"
-                  << std::endl;
+        chosenItemIdx = BRANCHLESSselectRandomDropItemIndex(cutoffs);
+        count.at(chosenItemIdx) += 1;
     }
+    end = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << duration << " microseconds\n";
+
+    // METHOD 3
+    start = std::chrono::high_resolution_clock::now();
+    for (int i = 0; i < ROLLS; i++)
+    {
+        chosenItemIdx = BINARYselectRandomDropItemIndex(cutoffs);
+        count.at(chosenItemIdx) += 1;
+    }
+    end = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << duration << " microseconds\n";
+
+    // uint64_t previousCutoff = 0;
+    // for (size_t i = 0; i < count.size(); i++)
+    // {
+    //     // The item's slice of the range is the gap between its cutoff and the previous one
+    //     const uint64_t itemRange = cutoffs.at(i) - previousCutoff;
+    //     previousCutoff = cutoffs.at(i);
+
+    //     const double observed = 100.0 * static_cast<double>(count.at(i)) / ROLLS;
+    //     const double expected = 100.0 * static_cast<double>(itemRange) / TOTAL;
+
+    //     std::cout << std::fixed << std::setprecision(4)
+    //               << "Item " << i << " chosen: " << count.at(i)
+    //               << ", Observed: " << observed << "%"
+    //               << ", Expected: " << expected << "%"
+    //               << std::endl;
+    // }
 }
 
 std::ifstream getFileStream(const std::string_view &filepath)
