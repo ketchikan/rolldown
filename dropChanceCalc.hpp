@@ -4,9 +4,7 @@
 #include <cstdint>
 #include <algorithm>
 
-constexpr uint64_t PERCENT_SCALE = 100;                               // two decimal places: "5.5" -> 550
-constexpr uint64_t ONE_HUNDRED_PERCENT = 100 * PERCENT_SCALE;         // 10'000
-constexpr uint64_t TOTAL = ONE_HUNDRED_PERCENT * ONE_HUNDRED_PERCENT; // 100'000'000
+#include "item.hpp"
 
 static std::random_device rd;
 static std::mt19937_64 gen(rd());

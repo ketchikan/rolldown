@@ -4,6 +4,10 @@
 #include <vector>
 #include <string>
 
+constexpr uint64_t PERCENT_SCALE = 100;                               // two decimal places: "5.5" -> 550
+constexpr uint64_t ONE_HUNDRED_PERCENT = 100 * PERCENT_SCALE;         // 10'000
+constexpr uint64_t TOTAL = ONE_HUNDRED_PERCENT * ONE_HUNDRED_PERCENT; // 100'000'000
+
 // TODO for now I'm making these Vectors, but that is going to be very inefficient to use at scale.
 // - If I determine a maximum size for each of these, I can declare those sizes and use that instead in a cstyle array or a c++ style array
 

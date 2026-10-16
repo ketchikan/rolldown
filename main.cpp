@@ -3,14 +3,13 @@
 #include <chrono>
 #include <optional>
 
+#include "dropChanceBuilder.hpp"
 #include "dropChanceCalc.hpp"
 #include "itemFileParse.hpp"
 // #include "item.hpp"
 
 // A system for selecting loot drops while preserving specific drop ratios.
 // An implementation/modification to roll down loot drop methodology
-
-constexpr int ROLLS = 100'000'000;
 
 /*
  */
@@ -42,6 +41,8 @@ std::vector<uint64_t> generateCutoffs(const ItemDropTable &table)
     }
     return cutoffs;
 }
+
+constexpr int ROLLS = 100'000'000;
 
 /*
  */
