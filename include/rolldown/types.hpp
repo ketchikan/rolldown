@@ -86,8 +86,10 @@ namespace rolldown
     struct BuildResult; // forward declaration; defined in builder.hpp
     /*
     @class DropTable
+
     @brief A validated table, ready to roll. Only buildDropTable can create a filled one.
-    @invariant packs_.size() == cutoffs_.size(), cutoffs_ is ascending, cutoffs_.back() == TOTAL
+
+    @note The following rules are applied to tables from successful builds: packs_.size() == cutoffs_.size(), cutoffs_ is ascending, cutoffs_.back() == TOTAL
     */
     class DropTable
     {
