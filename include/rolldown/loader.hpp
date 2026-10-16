@@ -82,7 +82,8 @@ namespace rolldown
 
                 // Trim trailing whitespace (including '\r' from Windows line endings), then the ';'
                 rest = rest.substr(0, rest.find_last_not_of(" \t\r") + 1);
-                if (rest.ends_with(';'))
+                if (!rest.empty() && rest.back() == ';')
+
                     rest.remove_suffix(1);
 
                 // The chance is the last word; everything before it is the item list

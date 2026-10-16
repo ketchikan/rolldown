@@ -19,6 +19,38 @@ What can it do? What makes it different from the obvious approach?
 
 ## Getting Started
 
+Download the repository. To run it with the benchmark:
+
+```CMake
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release   # configure: generate the build system into build/
+cmake --build build                              # build
+./build/rolldown_bench                           # run from the repo root (tests/*.txt paths are relative)
+
+```
+
+Optional flags:
+`-DROLLDOWN_BUILD_BENCH=OFF` to turn off building the benchmark
+
+If you copied the folder into your repo, add the following to your CMakeLists.txt file:
+
+```CMake
+add_subdirectory(external/rolldown)
+target_link_libraries(my_game PRIVATE rolldown::rolldown)
+```
+
+If you prefer having CMake download this repository from GitHub to include in your project, add this to your CMakeLists.txt file isntead:
+
+```CMake
+include(FetchContent)
+FetchContent_Declare(rolldown
+    GIT_REPOSITORY https://github.com/ketchikan/rolldown.git
+    GIT_TAG        v0.1.0
+)
+FetchContent_MakeAvailable(rolldown)
+
+target_link_libraries(my_game PRIVATE rolldown::rolldown)
+```
+
 ### Requirements
 
 What does someone need installed? (compiler, C++ standard, libraries)
