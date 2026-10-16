@@ -19,10 +19,12 @@ std::vector<uint64_t> generateCutoffs(const ItemDropTable &table)
 {
     std::vector<uint64_t> cutoffs;
     uint64_t currentCutoff = 0;
+    uint64_t tierTotal = 0;
     for (const auto tier : table.tiers)
     {
         // Convert tier probability
         uint64_t tierConvertedProb = convertRateToRange(tier.probability);
+        tierTotal += tierConvertedProb;
         for (const auto pack : tier.items)
         {
             // Conver item probability
@@ -34,5 +36,10 @@ std::vector<uint64_t> generateCutoffs(const ItemDropTable &table)
             cutoffs.push_back(currentCutoff);
         }
     }
+    if (tierTotal == ONE_HUNDRED_PERCENT && currentCutoff == TOTAL)
+    {
+        return cutoffs;
+    }
+    std::cerr << "ERROR: TIERS OR ITEMS WITHIN TIERS EXCEED A SUM OF 100%" << std::endl;
     return cutoffs;
 }

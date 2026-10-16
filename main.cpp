@@ -11,37 +11,6 @@
 // A system for selecting loot drops while preserving specific drop ratios.
 // An implementation/modification to roll down loot drop methodology
 
-/*
- */
-uint64_t convertRateToRange(const double &rate)
-{
-    return std::llround(rate * PERCENT_SCALE); // "5.5" -> 550, "24.5" -> 2450
-}
-
-/*
- */
-std::vector<uint64_t> generateCutoffs(const ItemDropTable &table)
-{
-    std::vector<uint64_t> cutoffs;
-    uint64_t currentCutoff = 0;
-    for (const auto tier : table.tiers)
-    {
-        // Convert tier probability
-        uint64_t tierConvertedProb = convertRateToRange(tier.probability);
-        for (const auto pack : tier.items)
-        {
-            // Conver item probability
-            uint64_t itemConvertedProb = convertRateToRange(pack.probability);
-
-            // Calculate the cutoff
-            uint64_t itemRange = tierConvertedProb * itemConvertedProb; // This used to be a function but that's dumb
-            currentCutoff += itemRange;
-            cutoffs.push_back(currentCutoff);
-        }
-    }
-    return cutoffs;
-}
-
 constexpr int ROLLS = 100'000'000;
 
 /*
@@ -81,6 +50,7 @@ int main()
     testCalculations("tests/items2.txt");
     testCalculations("tests/items3.txt");
     testCalculations("tests/items4.txt");
+    testCalculations("tests/itemsErrorTiersAndItemProbs.txt");
 
     return 0;
 }
