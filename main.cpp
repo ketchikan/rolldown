@@ -14,9 +14,9 @@ constexpr int ROLLS = 100'000'000;
 
 /*
  */
-uint64_t convertRateToRange(const std::string &rate)
+uint64_t convertRateToRange(const double &rate)
 {
-    return std::llround(std::stod(rate) * PERCENT_SCALE); // "5.5" -> 550, "24.5" -> 2450
+    return std::llround(rate * PERCENT_SCALE); // "5.5" -> 550, "24.5" -> 2450
 }
 
 /*

@@ -25,13 +25,13 @@ private:
 struct ItemPack
 {
     std::vector<Item> items;
-    std::string probability;
+    double probability;
 
     // Initialize with a default probability of 100%
-    ItemPack(const std::vector<Item> &items) : items(items), probability("100") {}
+    ItemPack(const std::vector<Item> &items) : items(items), probability(100.0) {}
 
     // Initialize with a specified probability
-    ItemPack(const std::vector<Item> &items, const std::string &probability) : items(items), probability(probability) {}
+    ItemPack(const std::vector<Item> &items, const double &probability) : items(items), probability(probability) {}
 };
 
 /*
@@ -40,14 +40,14 @@ struct DropTier
 {
     uint64_t id;
     std::string name;
-    std::string probability;
+    double probability;
     std::vector<ItemPack> items;
 
     // Construct without ItemPack vector
-    DropTier(const std::string &name, const std::string &probability) : id(nextId++), name(name), probability(probability) {}
+    DropTier(const std::string &name, const float &probability) : id(nextId++), name(name), probability(probability) {}
 
     // Construct with ItemPack vector
-    DropTier(const std::string &name, const std::string &probability, const std::vector<ItemPack> &itemPacks) : id(nextId++), name(name), probability(probability), items(itemPacks) {}
+    DropTier(const std::string &name, const float &probability, const std::vector<ItemPack> &itemPacks) : id(nextId++), name(name), probability(probability), items(itemPacks) {}
 
 private:
     inline static uint64_t nextId = 1;

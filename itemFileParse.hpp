@@ -46,7 +46,6 @@ std::vector<ItemDropTable> testFileParsing(std::string_view f)
         {
             inCharacter = true;
             dropTable = ItemDropTable{};
-            std::cout << line << std::endl;
         }
         else if (keyword == "Tier")
         {
@@ -56,8 +55,7 @@ std::vector<ItemDropTable> testFileParsing(std::string_view f)
                 std::cerr << "Bad tier line: " << line << std::endl;
                 continue;
             }
-            currentTier.emplace(name, chance);
-            std::cout << "TIER: " << name << ", Probability: " << chance << "%" << std::endl;
+            currentTier.emplace(name, std::stod(chance));
         }
         else if (keyword == "Item")
         {
@@ -111,8 +109,7 @@ std::vector<ItemDropTable> testFileParsing(std::string_view f)
                 continue;
             }
 
-            currentTier->items.push_back(ItemPack(items, std::string(chance)));
-            std::cout << "PACK: " << items.size() << " item(s), Probability: " << chance << "%" << std::endl;
+            currentTier->items.push_back(ItemPack(items, std::stod(std::string(chance))));
         }
         else if (keyword == "}")
         {
