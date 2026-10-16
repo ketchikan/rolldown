@@ -9,7 +9,23 @@
 
 namespace rolldown
 {
-    // ERRORS
+    namespace detail
+    {
+        /*
+        @fn convertRateToRange
+
+        @brief Converting a double to a scaled integer. Ex: 5.5 -> 550, 24.5 -> 2450
+
+        @param[in] rate: a double representing the rate to be converted.
+
+        @return uint64_t an integer representing the scaled input.
+         */
+        inline uint64_t convertRateToRange(const double &rate)
+        {
+            // Precondition: rate >= 0 (checked by buildDropTable), so the cast can't wrap
+            return static_cast<uint64_t>(std::llround(rate * PERCENT_SCALE));
+        }
+    }
 
     /*
     @enum BuildError
@@ -44,7 +60,11 @@ namespace rolldown
     /*
     @fn toString
 
-    @brief Convert a `BuildError` value to a string.
+    @brief Convert a `BuildError` value to a string to output error messages.
+
+    @param[in] e a `BuildError` enum value.
+
+    @return `char*` a pointer to a C-style string.
     */
     inline const char *toString(BuildError e)
     {
@@ -62,23 +82,14 @@ namespace rolldown
             return "The sum of probabilities of the defined tiers is not equal to 100%.";
         case BuildError::ItemSumNot100:
             return "The sum of probabilities for items within a single tier is not equal to 100%.";
-        default:
-            return "Unknown error.";
         }
-    }
-
-    /*
-     */
-    inline uint64_t convertRateToRange(const double &rate)
-    {
-        // Precondition: rate >= 0 (checked by buildDropTable), so the cast can't wrap
-        return static_cast<uint64_t>(std::llround(rate * PERCENT_SCALE)); // "5.5" -> 550, "24.5" -> 2450
+        return "Unknown error."; // Moved out of the default because if I later add a new error type to the enum then it will throw an error through the compiler, which is handy.
     }
 
     /*
     @fn buildDropTable
 
-    @brief Validate the structure and probabilities found in `ItemDropTable` objects and convert them to `BuildResult` objects.
+    @brief Validate the structure and probabilities found in `DropTableSpec` objects and convert them to `BuildResult` objects.
 
     @return `BuildResult` contains the `DropTable` object as well as relevant error details to address or ignore.
 
@@ -94,7 +105,7 @@ namespace rolldown
     }
     @endcode
     */
-    inline BuildResult buildDropTable(const ItemDropTable &spec)
+    inline BuildResult buildDropTable(const DropTableSpec &spec)
     {
         BuildResult r;
         auto fail = [&r](BuildError error, size_t tier = 0)
@@ -114,55 +125,53 @@ namespace rolldown
         }
 
         // Iterate over the tiers
-        size_t currentTier = 0;
-        for (const auto &tier : spec.tiers)
+        for (size_t t = 0; t < spec.tiers.size(); ++t)
         {
+            const TierSpec &tier = spec.tiers[t];
             // Validate that at least 1 item pack exists
-            if (tier.items.empty())
+            if (tier.packs.empty())
             {
-                return fail(BuildError::EmptyTier, currentTier);
+                return fail(BuildError::EmptyTier, t);
             }
 
             // Validate that tier probability is >0
             if (tier.probability < 0)
             {
-                return fail(BuildError::NegativeProbability, currentTier);
+                return fail(BuildError::NegativeProbability, t);
             }
 
             // Convert tier probability
-            uint64_t tierConvertedProb = convertRateToRange(tier.probability);
+            uint64_t tierConvertedProb = detail::convertRateToRange(tier.probability);
             tierTotal += tierConvertedProb;
 
             uint64_t itemProbSum = 0;
-            for (const auto &pack : tier.items)
+            for (const auto &pack : tier.packs)
             {
                 // Validate that the pack has a probability >0
                 if (pack.probability < 0)
                 {
-                    return fail(BuildError::NegativeProbability, currentTier);
+                    return fail(BuildError::NegativeProbability, t);
                 }
 
                 // Conver item probability
-                uint64_t itemConvertedProb = convertRateToRange(pack.probability);
+                uint64_t itemConvertedProb = detail::convertRateToRange(pack.probability);
                 itemProbSum += itemConvertedProb;
 
                 // Calculate the cutoff
                 uint64_t itemRange = tierConvertedProb * itemConvertedProb; // This used to be a function but that's dumb
                 currentCutoff += itemRange;
-                r.table.packs.push_back(pack);
-                r.table.cutoffs.push_back(currentCutoff);
+                r.table.packs_.push_back(pack);
+                r.table.cutoffs_.push_back(currentCutoff);
             }
-            if (itemProbSum != ONE_HUNDRED_PERCENT)
+            if (itemProbSum != detail::ONE_HUNDRED_PERCENT)
             {
-                return fail(BuildError::ItemSumNot100, currentTier);
+                return fail(BuildError::ItemSumNot100, t);
             }
-
-            currentTier++;
         }
 
-        if (tierTotal != ONE_HUNDRED_PERCENT)
+        if (tierTotal != detail::ONE_HUNDRED_PERCENT)
         {
-            return fail(BuildError::TierSumNot100, currentTier);
+            return fail(BuildError::TierSumNot100);
         }
 
         return r;

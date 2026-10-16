@@ -7,10 +7,13 @@
 
 namespace rolldown
 {
+    constexpr uint64_t PERCENT_SCALE = 100; // two decimal places: "5.5" -> 550
 
-    constexpr uint64_t PERCENT_SCALE = 100;                               // two decimal places: "5.5" -> 550
-    constexpr uint64_t ONE_HUNDRED_PERCENT = 100 * PERCENT_SCALE;         // 10'000
-    constexpr uint64_t TOTAL = ONE_HUNDRED_PERCENT * ONE_HUNDRED_PERCENT; // 100'000'000
+    namespace detail
+    {
+        constexpr uint64_t ONE_HUNDRED_PERCENT = 100 * PERCENT_SCALE;         // 10'000
+        constexpr uint64_t TOTAL = ONE_HUNDRED_PERCENT * ONE_HUNDRED_PERCENT; // 100'000'000
+    }
 
     // TODO for now I'm making these Vectors, but that is going to be very inefficient to use at scale.
     // - If I determine a maximum size for each of these, I can declare those sizes and use that instead in a cstyle array or a c++ style array
@@ -44,52 +47,63 @@ namespace rolldown
 
     /*
      */
-    struct DropTier
+    struct TierSpec
     {
         uint64_t id;
         std::string name;
         double probability;
-        std::vector<ItemPack> items;
+        std::vector<ItemPack> packs;
 
         // Construct without ItemPack vector
-        DropTier(const std::string &name, const double &probability) : id(nextId++), name(name), probability(probability) {}
+        TierSpec(const std::string &name, const double &probability) : id(nextId++), name(name), probability(probability) {}
 
         // Construct with ItemPack vector
-        DropTier(const std::string &name, const double &probability, const std::vector<ItemPack> &itemPacks) : id(nextId++), name(name), probability(probability), items(itemPacks) {}
+        TierSpec(const std::string &name, const double &probability, const std::vector<ItemPack> &itemPacks) : id(nextId++), name(name), probability(probability), packs(itemPacks) {}
 
     private:
         inline static uint64_t nextId = 1;
     };
 
-    /*
-    @struct NumberDrops
+    // /*
+    // @struct NumberDrops
 
-    @brief Describe the number of rolls to be performed for dropping random items and the probability of that number of rolls.
+    // @brief Describe the number of rolls to be performed for dropping random items and the probability of that number of rolls.
+    //  */
+    // struct NumberDrops
+    // {
+    //     uint8_t numRolls;
+    //     float probability;
+    // };
+
+    /*
      */
-    struct NumberDrops
+    struct DropTableSpec
     {
-        uint8_t numRolls;
-        float probability;
+        // std::vector<NumberDrops> numDrops;
+        std::vector<TierSpec> tiers;
     };
 
+    struct BuildResult; // forward declaration; defined in builder.hpp
     /*
-     */
-    struct ItemDropTable
-    {
-        std::vector<NumberDrops> numDrops;
-        std::vector<DropTier> tiers;
-    };
-
-    /*
-    @struct DropTable
-
-    @brief A validated table, ready to perform rolls on. Built at load time with buildDropTable.
-    @note This is implemented utilizing Struct-of-arrays to help pack up to 8 cutoffs into a single 64-byte cache line.
+    @class DropTable
+    @brief A validated table, ready to roll. Only buildDropTable can create a filled one.
+    @invariant packs_.size() == cutoffs_.size(), cutoffs_ is ascending, cutoffs_.back() == TOTAL
     */
-    struct DropTable
+    class DropTable
     {
-        std::vector<ItemPack> packs;   // every pack from every tier, in roll order
-        std::vector<uint64_t> cutoffs; // cutoffs[i] is the upper roll limit of packs[i]
+    public:
+        const std::vector<ItemPack> &packs() const { return packs_; }
+        size_t size() const { return packs_.size(); }
+
+    private:
+        std::vector<ItemPack> packs_;   // every pack from every tier, in roll order
+        std::vector<uint64_t> cutoffs_; // cutoffs_[i] is the upper roll limit of packs_[i]
+
+        // The only code allowed to write to (or depend on) the private members
+        friend BuildResult buildDropTable(const DropTableSpec &spec);
+
+        template <class Rng>
+        friend size_t rollIndex(const DropTable &table, Rng &rng);
     };
 
 } // namespace rolldown

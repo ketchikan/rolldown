@@ -16,36 +16,38 @@
 
 namespace rolldown
 {
-
-    class ItemFile
+    namespace detail
     {
-    public:
-        explicit ItemFile(std::string_view fileName)
-            : stream(std::string(fileName))
+        class ItemFile
         {
-            if (!stream)
-                throw std::runtime_error("FILE NOT FOUND: " + std::string(fileName));
-        }
+        public:
+            explicit ItemFile(std::string_view fileName)
+                : stream(std::string(fileName))
+            {
+                if (!stream)
+                    throw std::runtime_error("FILE NOT FOUND: " + std::string(fileName));
+            }
 
-        // Reads the next line; returns false at end of file
-        bool readLine(std::string &line)
-        {
-            return static_cast<bool>(std::getline(stream, line));
-        }
+            // Reads the next line; returns false at end of file
+            bool readLine(std::string &line)
+            {
+                return static_cast<bool>(std::getline(stream, line));
+            }
 
-    private:
-        std::ifstream stream;
-    };
+        private:
+            std::ifstream stream;
+        };
+    }
 
     // This is a dumb testing method to avoid using JSON for now. In the future I'll stop being stubborn and just use JSON but for now I don't want to.
-    inline std::vector<ItemDropTable> testFileParsing(std::string_view f)
+    inline std::vector<DropTableSpec> loadTables(std::string_view f)
     {
-        ItemFile file(f);
+        detail::ItemFile file(f);
         std::string line;
 
-        std::vector<ItemDropTable> tables;
-        ItemDropTable dropTable;
-        std::optional<DropTier> currentTier; // empty when we're not inside a tier
+        std::vector<DropTableSpec> tables;
+        DropTableSpec dropTable;
+        std::optional<TierSpec> currentTier; // empty when we're not inside a tier
         bool inCharacter = false;
 
         while (file.readLine(line)) // the only place a line is ever read
@@ -58,7 +60,7 @@ namespace rolldown
             if (keyword == "Character")
             {
                 inCharacter = true;
-                dropTable = ItemDropTable{};
+                dropTable = DropTableSpec{};
             }
             else if (keyword == "Tier")
             {
@@ -123,7 +125,7 @@ namespace rolldown
                     continue;
                 }
 
-                currentTier->items.push_back(ItemPack(items, std::stod(std::string(chance))));
+                currentTier->packs.push_back(ItemPack(items, std::stod(std::string(chance))));
             }
             else if (keyword == "}")
             {

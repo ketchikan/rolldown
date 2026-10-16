@@ -29,8 +29,8 @@ void outputChances(const rolldown::DropTable &table)
     start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < ROLLS; i++)
     {
-        // chosenItemIdx = rolldown::selectRandomDropItemIndex(cutoffs, gen);
-        chosenItemIdx = rolldown::selectRandomDropItemIndex(table.cutoffs, rng);
+        // chosenItemIdx = rolldown::rollIndex(table, gen);
+        chosenItemIdx = rolldown::rollIndex(table, rng);
     }
     end = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -41,7 +41,7 @@ void outputChances(const rolldown::DropTable &table)
 
 void testCalculations(std::string_view f)
 {
-    std::vector<rolldown::ItemDropTable> tables = rolldown::testFileParsing(f);
+    std::vector<rolldown::DropTableSpec> tables = rolldown::loadTables(f);
     for (const auto &table : tables)
     {
         const auto result = rolldown::buildDropTable(table);
@@ -61,6 +61,7 @@ int main()
     testCalculations("tests/items3.txt");
     testCalculations("tests/items4.txt");
     testCalculations("tests/itemsErrorTiersAndItemProbs.txt");
+    testCalculations("tests/itemsCompensatingTiers.txt");
 
     return 0;
 }
