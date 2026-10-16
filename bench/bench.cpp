@@ -18,7 +18,7 @@ static std::mt19937_64 rng{12345};
 
 /*
  */
-void outputChances(const std::vector<uint64_t> &cutoffs)
+void outputChances(const rolldown::DropTable &table)
 {
     size_t chosenItemIdx = 0;
     std::chrono::time_point<std::chrono::high_resolution_clock> start;
@@ -30,7 +30,7 @@ void outputChances(const std::vector<uint64_t> &cutoffs)
     for (int i = 0; i < ROLLS; i++)
     {
         // chosenItemIdx = rolldown::selectRandomDropItemIndex(cutoffs, gen);
-        chosenItemIdx = rolldown::selectRandomDropItemIndex(cutoffs, rng);
+        chosenItemIdx = rolldown::selectRandomDropItemIndex(table.cutoffs, rng);
     }
     end = std::chrono::high_resolution_clock::now();
     duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -42,10 +42,15 @@ void outputChances(const std::vector<uint64_t> &cutoffs)
 void testCalculations(std::string_view f)
 {
     std::vector<rolldown::ItemDropTable> tables = rolldown::testFileParsing(f);
-    for (auto table : tables)
+    for (const auto &table : tables)
     {
-        std::vector<uint64_t> cutoffs = rolldown::generateCutoffs(table);
-        outputChances(cutoffs);
+        const auto result = rolldown::buildDropTable(table);
+        if (!result)
+        {
+            std::cerr << rolldown::toString(result.error) << " (tier " << result.tierIndex << ")\n";
+            continue;
+        }
+        outputChances(result.table);
     }
 }
 

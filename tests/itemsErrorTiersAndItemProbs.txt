@@ -30,7 +30,7 @@ Character 2
     }
     Tier Common 76.5
     {
-        Item Potion 100;
+        Item Potion 80;
     }
 }
 
@@ -38,7 +38,7 @@ Character 3
 {
     Tier Legendary 10
     {
-        Item Sword 70;
+        Item Sword 60;
         Item Axe 40;
     }
     Tier Rare 20
@@ -48,6 +48,6 @@ Character 3
     }
     Tier Common 76.5
     {
-        Item Potion 100;
+        Item Potion -10;
     }
 }

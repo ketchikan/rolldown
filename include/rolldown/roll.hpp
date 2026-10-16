@@ -4,7 +4,6 @@
 #include <vector>
 #include <algorithm>
 #include <cstddef>
-#include <cstdint>
 #include <limits>
 
 #include "types.hpp"
@@ -45,6 +44,20 @@ namespace rolldown
         // This is now O(log n) instead of O(n)
         const auto it = std::upper_bound(cutoffs.begin(), cutoffs.end(), roll);
         return static_cast<size_t>(it - cutoffs.begin());
+    }
+
+    /*
+    @fn roll
+
+    @brief After providing a `DropTable` and a 64-bit RNG method, receive back a randomly selected `ItemPack` object from the `DropTable`.
+
+    @param[in] table: a `DropTable` object
+    @param[in] rng: any generator producing full 64-bit values works (std::mt19937_64, PCG64, xoshiro256**...)
+    */
+    template <class Rng>
+    const ItemPack &roll(const DropTable &table, Rng &rng)
+    {
+        return table.packs[selectRandomDropItemIndex(table.cutoffs, rng)];
     }
 
 } // namespace rolldown

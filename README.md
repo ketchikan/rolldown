@@ -17,6 +17,8 @@ Drop the folder into your project and include it. No build step and no dependenc
 
 What can it do? What makes it different from the obvious approach?
 
+- Rather than utilizing C++23's `std::expected`, created custom error reporting usable in compilers as early as C++17.
+
 ## Getting Started
 
 Download the repository. To run it with the benchmark:
