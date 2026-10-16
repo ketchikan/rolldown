@@ -1,23 +1,66 @@
-Character 1;
-Tier Default 100:
-item Sword 100;
+Character 1
+{
+    Tier Default 100
+    {
+        Item Sword 100;
+    }
+}
 
-Character 2;
-tier Legendary 3.5;
-item Sword 60;
-item Axe 40;
-tier Rare 20;
-item Bow 50;
-item Shield 50;
-tier Common 76.5;
-item potion 100;
+Character 2
+{
+    Tier Legendary 3.5
+    {
+        Item Sword 60;
+        Item Axe 40;
+    }
+    Tier Rare 20
+    {
+        Item Bow 50;
+        Item Shield 50;
+    }
+    Tier Common 76.5
+    {
+        Item Potion 100;
+    }
+}
 
-Character 3;
-tier Legendary 3.5;
-item Sword 60;
-item Axe & item Sword 40;
-tier Rare 20;
-item Bow 50;
-item Shield 50;
-tier Common 76.5;
-item potion 100;
+Character 3
+{
+    Tier Legendary 3.5
+    {
+        Item Sword 60;
+        Item Axe, Item Sword 40;
+    }
+    Tier Rare 20
+    {
+        Item Bow 50;
+        Item Shield 50;
+    }
+    Tier Common 76.5
+    {
+        Item Potion 100;
+    }
+}
+
+Character 4
+{
+    Tier Legendary 10
+    {
+        Item Staff 25;
+        Item Scroll 75;
+    }
+    Tier Rare 17.5
+    {
+        Item Lance 60;
+        Item Mace 40;
+    }
+    Tier Uncommon 32.5
+    {
+        Item Bow 50;
+        Item Sword 50;
+    }
+    Tier Common 40
+    {
+        Item Potion 100;
+    }
+}
