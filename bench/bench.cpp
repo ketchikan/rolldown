@@ -31,3 +31,11 @@ TEST_CASE("rollIndex vs table size", "[benchmark]")
         BENCHMARK("rollIndex, " + std::to_string(n) + " packs") { return rolldown::rollIndex(table, xo); };
     }
 }
+
+TEST_CASE("roll vs rollIndex", "[benchmark]")
+{
+    XoshiroCpp::Xoshiro256PlusPlus xo{12345};
+    const auto table = rolldown::buildDropTable(makeEvenSpec(100)).table;
+    BENCHMARK("roll, 100 packs") { return rolldown::roll(table, xo); };
+    BENCHMARK("rollIndex, 100 packs") { return rolldown::rollIndex(table, xo); };
+}

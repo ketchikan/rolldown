@@ -3,8 +3,8 @@
 #include "rolldown/rolldown.hpp"
 #include "spec_helpers.hpp"
 
-using rolldown::BuildError;
 using rolldown::buildDropTable;
+using rolldown::BuildError;
 
 TEST_CASE("a valid spec builds", "[build]")
 {
@@ -31,6 +31,11 @@ TEST_CASE("invalid specs report the right error and tier", "[build]")
         const auto result = buildDropTable(makeSpec({{100, {110, -10}}}));
         CHECK(result.error == BuildError::NegativeProbability);
     }
+    SECTION("a negative tier probability")
+    {
+        const auto result = buildDropTable(makeSpec({{-100, {110, 10}}}));
+        CHECK(result.error == BuildError::NegativeProbability);
+    }
     SECTION("tiers that don't add up to 100%")
     {
         CHECK(buildDropTable(makeSpec({{50, {100}}, {40, {100}}})).error == BuildError::TierSumNot100);
@@ -45,11 +50,32 @@ TEST_CASE("invalid specs report the right error and tier", "[build]")
 
 TEST_CASE("the loader reads a table file", "[loader]")
 {
-    const auto specs = rolldown::loadTables(ROLLDOWN_TEST_DATA "/items3.txt");
+    SECTION("load from items3.txt")
+    {
+        const auto specs = rolldown::loadTables(ROLLDOWN_TEST_DATA "/items3.txt");
 
-    REQUIRE(specs.size() == 1);
-    REQUIRE(specs[0].tiers.size() == 3);
-    CHECK(specs[0].tiers[0].packs.size() == 2);
-    CHECK(specs[0].tiers[0].packs[1].items.size() == 2); // "Item Axe, Item Sword" is one pack of two items
-    CHECK(buildDropTable(specs[0]));
+        REQUIRE(specs.size() == 1);
+        REQUIRE(specs[0].tiers.size() == 3);
+        CHECK(specs[0].tiers[0].packs.size() == 2);
+        CHECK(specs[0].tiers[0].packs[1].items.size() == 2); // "Item Axe, Item Sword" is one pack of two items
+        CHECK(buildDropTable(specs[0]));
+    }
+
+    SECTION("load from itemsErrorTiersAndItemProbs.txt")
+    {
+        const auto specs = rolldown::loadTables(ROLLDOWN_TEST_DATA "/itemsErrorTiersAndItemProbs.txt");
+        REQUIRE(specs.size() == 4);
+
+        const auto specResult1 = buildDropTable(specs[0]);
+        CHECK(specResult1.error == BuildError::TierSumNot100);
+
+        const auto specResult2 = buildDropTable(specs[1]);
+        CHECK(specResult2.error == BuildError::ItemSumNot100);
+
+        const auto specResult3 = buildDropTable(specs[2]);
+        CHECK(specResult3.error == BuildError::NegativeProbability);
+
+        const auto specResult4 = buildDropTable(specs[3]);
+        CHECK(specResult4.error == BuildError::EmptyTier);
+    }
 }

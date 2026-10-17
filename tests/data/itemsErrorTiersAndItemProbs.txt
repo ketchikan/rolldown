@@ -51,3 +51,10 @@ Character 3
         Item Potion -10;
     }
 }
+
+Character 4
+{
+    Tier Legendary 10
+    {
+    }
+}

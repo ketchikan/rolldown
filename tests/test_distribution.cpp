@@ -62,4 +62,11 @@ TEMPLATE_TEST_CASE("rolls follow the configured probabilities", "[distribution]"
         REQUIRE(result);
         checkDistribution(countRolls(result.table, rng, N), expectedProbabilities(spec), N);
     }
+    SECTION("a large pack (100 items)")
+    {
+        const auto spec = makeEvenSpec(100);
+        const auto result = rolldown::buildDropTable(spec);
+        REQUIRE(result);
+        checkDistribution(countRolls(result.table, rng, N), expectedProbabilities(spec), N);
+    }
 }
