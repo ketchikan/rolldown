@@ -93,7 +93,7 @@ namespace rolldown
 
     @return `BuildResult` contains the `DropTable` object as well as relevant error details to address or ignore.
 
-    @note Important: the table returns immediately after an error is detected. This could result in empty or partially completed `DropTable` objects. Validating the output is recommended.
+    @note Important: Upon failure, the `DropTable` object found at BuildResult.table will contain empty vectors.
 
 
     @code{.cpp}
@@ -110,6 +110,8 @@ namespace rolldown
         BuildResult r;
         auto fail = [&r](BuildError error, size_t tier = 0)
         {
+            r.table.packs_.clear();
+            r.table.cutoffs_.clear();
             r.error = error;
             r.tierIndex = tier;
             return r;
