@@ -84,7 +84,7 @@ for (const Item &item : drop.items)
 ```
 
 > 💡 A complete, runnable version of this code is in
-> [`examples/basic.cpp`][example_basic_url].
+> [`examples/json_loader/main.cpp`][example_json_url].
 
 ## How probabilities work
 
@@ -134,7 +134,7 @@ items (a "nothing drops" result).
 - **No dependencies, no file format.** Rolldown takes plain C++ structs. Load
   them from JSON, a database, a level editor, or build them in code.
 - **Fast.** One roll is a binary search over the table: _O(log n)_, about
-  5–8 ns on a modern CPU (see [benchmarks](#-tests-and-benchmarks)).
+  5–8 ns on a modern CPU (see [benchmarks](#tests-and-benchmarks)).
 - **Statistically tested.** The test suite rolls each test table 10 million
   times and checks every pack's drop rate against its configured chance.
 
@@ -328,7 +328,6 @@ generator makes the full roll faster, with no change to Rolldown.
 - **Roll counts:** let a table decide how many rolls to make, with a chance for
   each count.
 - **Alias method:** _O(1)_ rolls for very large tables.
-- **CI:** build and test on GCC, Clang, and MSVC for each commit.
 
 ## License
 
@@ -354,7 +353,6 @@ library itself does not use them.
 [repo_url]: https://github.com/ketchikan/rolldown
 [license_url]: https://github.com/ketchikan/rolldown/blob/main/LICENSE
 [include_url]: https://github.com/ketchikan/rolldown/tree/main/include/rolldown
-[example_basic_url]: https://github.com/ketchikan/rolldown/blob/main/examples/basic.cpp
 [example_json_url]: https://github.com/ketchikan/rolldown/tree/main/examples/json_loader
 [lessons_url]: https://github.com/ketchikan/rolldown/blob/main/docs/LESSONS.md
 
