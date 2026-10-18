@@ -9,29 +9,26 @@ on:
 
 jobs:
   build: # Runs build tests
-    name: ${{ matrix.name }}
-    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.compiler.name }} (${{ matrix.build_type }})
+    runs-on: ${{ matrix.compiler.os }}
 
     strategy:
       fail-fast: false # Don't exit on the first error (if any); we want to get all results when we run these build tests
       matrix:
-        include: # The linux VM GitHub uses has both GCC and Clang, so we might as well run on both.
+        build_type: [Debug, Release]
+        compiler: # The linux VM GitHub uses has both GCC and Clang, so we might as well run on both.
           - name: Linux GCC
             os: ubuntu-latest
             cmake_args: -DCMAKE_CXX_COMPILER=g++
-            build_type: [Debug, Release]
           - name: Linux Clang
             os: ubuntu-latest
             cmake_args: -DCMAKE_CXX_COMPILER=clang++
-            build_type: [Debug, Release]
           - name: macOS Apple Clang
             os: macos-latest
             cmake_args: ""
-            build_type: [Debug, Release]
           - name: Windows MSVC
             os: windows-latest
             cmake_args: ""
-            build_type: [Debug, Release]
 
     steps:
       - name: Check out the code # This just means that it's making a copy of your repo into the VM
@@ -41,10 +38,10 @@ jobs:
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ${{ matrix.cmake_args }}
 
       - name: Build
-        run: cmake --build build --config Release --parallel
+        run: cmake --build build --config ${{ matrix.build_type }} --parallel
 
       - name: Test
-        run: ctest --test-dir build -C Release --output-on-failure
+        run: ctest --test-dir build -C ${{ matrix.build_type }} --output-on-failure
 
         # IMPORTANT
         # Notice that this doesn't do any benchmark run. That's on purpose, because the VM's are shared and so the timing wouldn't be accurate.
