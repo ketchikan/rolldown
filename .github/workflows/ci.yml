@@ -1,0 +1,46 @@
+name: CI
+
+# `on` designates on what actions jobs should run (here that's push, pull_request, and workflow_dispatch)
+on:
+  push:
+    branches: [main] # on pushes to `main`
+  pull_request: # any pull request will run tests first
+  workflow_dispatch: # adds a "Run workflow" button to the repo so I can re-run without pushing
+
+jobs:
+  build: # Runs build tests
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false # Don't exit on the first error (if any); we want to get all results when we run these build tests
+      matrix:
+        include: # The linux VM GitHub uses has both GCC and Clang, so we might as well run on both.
+          - name: Linux GCC
+            os: ubuntu-latest
+            cmake_args: -DCMAKE_CXX_COMPILER=g++
+          - name: Linux Clang
+            os: ubuntu-latest
+            cmake_args: -DCMAKE_CXX_COMPILER=clang++
+          - name: macOS Apple Clang
+            os: macos-latest
+            cmake_args: ""
+          - name: Windows MSVC
+            os: windows-latest
+            cmake_args: ""
+
+    steps:
+      - name: Check out the code # This just means that it's making a copy of your repo into the VM
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release ${{ matrix.cmake_args }}
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Test
+        run: ctest --test-dir build -C Release --output-on-failure
+
+        # IMPORTANT
+        # Notice that this doesn't do any benchmark run. That's on purpose, because the VM's are shared and so the timing wouldn't be accurate.
