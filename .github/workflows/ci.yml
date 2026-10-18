@@ -43,5 +43,22 @@ jobs:
       - name: Test
         run: ctest --test-dir build -C ${{ matrix.build_type }} --output-on-failure
 
+  sanitizers:
+    name: Sanitizers (Linux Clang, Debug)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the code
+        uses: actions/checkout@v6
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=clang++ -DROLLDOWN_SANITIZE=ON
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
         # IMPORTANT
         # Notice that this doesn't do any benchmark run. That's on purpose, because the VM's are shared and so the timing wouldn't be accurate.
