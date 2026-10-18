@@ -6,6 +6,10 @@
 [![Header-only][header_only_img]][repo_url]
 [![Dependencies][deps_img]][repo_url]
 [![License][license_img]][license_url]
+[![CI][ci_img]][ci_url]
+[![Compiler Tests][compilers_img]]
+[ci_img]: https://img.shields.io/github/actions/workflow/status/ketchikan/dropRate/ci.yml?branch=main&style=for-the-badge&label=CI
+[ci_url]: https://github.com/ketchikan/dropRate/actions/workflows/ci.yml
 
 A header-only C++17 library for **weighted random selection**: loot drops, enemy
 actions, procedural generation, or any time one option must be picked from
@@ -301,10 +305,6 @@ ctest --test-dir build --output-on-failure   # run the tests
 About half of each roll is the random number generator itself. A faster
 generator makes the full roll faster, with no change to Rolldown.
 
-> 🔔 So far, Rolldown has been built and tested with Apple Clang on macOS,
-> with strict warnings turned on (`-Wall -Wextra -Wpedantic -Wconversion`).
-> The GCC and MSVC code paths are written but not yet verified by CI.
-
 ## Design decisions
 
 - **Errors are values, not exceptions,** so that Rolldown works in game
@@ -347,6 +347,9 @@ library itself does not use them.
 [header_only_img]: https://img.shields.io/badge/header--only-yes-success?style=for-the-badge&logo=none
 [deps_img]: https://img.shields.io/badge/dependencies-none-success?style=for-the-badge&logo=none
 [license_img]: https://img.shields.io/badge/license-MIT-blue?style=for-the-badge&logo=none
+[ci_img]: https://img.shields.io/github/actions/workflow/status/ketchikan/dropRate/ci.yml?branch=main&style=for-the-badge&label=CI
+[ci_url]: https://github.com/ketchikan/dropRate/actions/workflows/ci.yml
+[compilers_img]: https://img.shields.io/badge/compilers-GCC%20%7C%20Clang%20%7C%20MSVC-informational?style=for-the-badge&logo=none
 
 <!-- Repository -->
 
