@@ -19,16 +19,19 @@ jobs:
           - name: Linux GCC
             os: ubuntu-latest
             cmake_args: -DCMAKE_CXX_COMPILER=g++
+            build_type: [Debug, Release]
           - name: Linux Clang
             os: ubuntu-latest
             cmake_args: -DCMAKE_CXX_COMPILER=clang++
+            build_type: [Debug, Release]
           - name: macOS Apple Clang
             os: macos-latest
             cmake_args: ""
+            build_type: [Debug, Release]
           - name: Windows MSVC
             os: windows-latest
             cmake_args: ""
-        build_type: [Debug, Release]
+            build_type: [Debug, Release]
 
     steps:
       - name: Check out the code # This just means that it's making a copy of your repo into the VM
