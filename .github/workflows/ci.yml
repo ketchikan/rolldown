@@ -28,13 +28,14 @@ jobs:
           - name: Windows MSVC
             os: windows-latest
             cmake_args: ""
+        build_type: [Debug, Release]
 
     steps:
       - name: Check out the code # This just means that it's making a copy of your repo into the VM
         uses: actions/checkout@v6
 
       - name: Configure
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release ${{ matrix.cmake_args }}
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ${{ matrix.cmake_args }}
 
       - name: Build
         run: cmake --build build --config Release --parallel
