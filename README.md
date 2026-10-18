@@ -40,7 +40,7 @@ Or straight from GitHub:
 ```cmake
 include(FetchContent)
 FetchContent_Declare(rolldown
-    GIT_REPOSITORY https://github.com/ketchikan/dropRate.git
+    GIT_REPOSITORY https://github.com/ketchikan/rolldown.git
     GIT_TAG        v0.1.0
 )
 FetchContent_MakeAvailable(rolldown)
@@ -345,18 +345,18 @@ library itself does not use them.
 [header_only_img]: https://img.shields.io/badge/header--only-yes-success?style=for-the-badge&logo=none
 [deps_img]: https://img.shields.io/badge/dependencies-none-success?style=for-the-badge&logo=none
 [license_img]: https://img.shields.io/badge/license-MIT-blue?style=for-the-badge&logo=none
-[ci_img]: https://img.shields.io/github/actions/workflow/status/ketchikan/dropRate/ci.yml?branch=main&style=for-the-badge&label=CI
-[ci_url]: https://github.com/ketchikan/dropRate/actions/workflows/ci.yml
+[ci_img]: https://img.shields.io/github/actions/workflow/status/ketchikan/rolldown/ci.yml?branch=main&style=for-the-badge&label=CI
+[ci_url]: https://github.com/ketchikan/rolldown/actions/workflows/ci.yml
 [compilers_img]: https://img.shields.io/badge/compilers-GCC%20%7C%20Clang%20%7C%20MSVC-informational?style=for-the-badge&logo=none
 
 <!-- Repository -->
 
-[repo_url]: https://github.com/ketchikan/dropRate
-[license_url]: https://github.com/ketchikan/dropRate/blob/main/LICENSE
-[include_url]: https://github.com/ketchikan/dropRate/tree/main/include/rolldown
-[example_basic_url]: https://github.com/ketchikan/dropRate/blob/main/examples/basic.cpp
-[example_json_url]: https://github.com/ketchikan/dropRate/tree/main/examples/json_loader
-[lessons_url]: https://github.com/ketchikan/dropRate/blob/main/docs/LESSONS.md
+[repo_url]: https://github.com/ketchikan/rolldown
+[license_url]: https://github.com/ketchikan/rolldown/blob/main/LICENSE
+[include_url]: https://github.com/ketchikan/rolldown/tree/main/include/rolldown
+[example_basic_url]: https://github.com/ketchikan/rolldown/blob/main/examples/basic.cpp
+[example_json_url]: https://github.com/ketchikan/rolldown/tree/main/examples/json_loader
+[lessons_url]: https://github.com/ketchikan/rolldown/blob/main/docs/LESSONS.md
 
 <!-- Other projects -->
 
