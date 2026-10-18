@@ -1,51 +1,44 @@
+<div align="center">
+
 # Rolldown
 
-Header-only C++20 drop tables for games: tiered loot with exact percentages,
-no floating-point drift, and fast O(n) rolls (pity system planned).
+[![C++17][cpp_img]][cpp_url]
+[![Header-only][header_only_img]][repo_url]
+[![Dependencies][deps_img]][repo_url]
+[![License][license_img]][license_url]
 
-​```cpp
+A header-only C++17 library for **weighted random selection**: loot drops, enemy
+actions, procedural generation, or any time one option must be picked from
+many by probability. **You set the probabilities, and Rolldown picks as many
+as you need.**
+
+</div>
+
+## Quick start
+
+Rolldown needs a **C++17** compiler and nothing else. There are no
+dependencies and no build step.
+
+Copy the [`include/rolldown/`][include_url] folder into your project and
+include one header:
+
+```cpp
 #include "rolldown/rolldown.hpp"
-
-auto table = rolldown::loadTables("enemies.txt")[0];
-auto cutoffs = rolldown::buildCutoffs(table); // do once at load time
-size_t idx = rolldown::roll(cutoffs); // do per drop
-​```
-
-Drop the folder into your project and include it. No build step and no dependencies.
-
-## Features
-
-What can it do? What makes it different from the obvious approach?
-
-- Rather than utilizing C++23's `std::expected`, created custom error reporting usable in compilers as early as C++17.
-
-## Getting Started
-
-Download the repository. To run it with the benchmark:
-
-```CMake
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release   # configure: generate the build system into build/
-cmake --build build                              # build
-./build/rolldown_bench                           # run from the repo root (tests/*.txt paths are relative)
-
 ```
 
-Optional flags:
-`-DROLLDOWN_BUILD_BENCH=OFF` to turn off building the benchmark
+Or let CMake add it for you, from a copy of this repository:
 
-If you copied the folder into your repo, add the following to your CMakeLists.txt file:
-
-```CMake
+```cmake
 add_subdirectory(external/rolldown)
 target_link_libraries(my_game PRIVATE rolldown::rolldown)
 ```
 
-If you prefer having CMake download this repository from GitHub to include in your project, add this to your CMakeLists.txt file isntead:
+Or straight from GitHub:
 
-```CMake
+```cmake
 include(FetchContent)
 FetchContent_Declare(rolldown
-    GIT_REPOSITORY https://github.com/ketchikan/rolldown.git
+    GIT_REPOSITORY https://github.com/ketchikan/dropRate.git
     GIT_TAG        v0.1.0
 )
 FetchContent_MakeAvailable(rolldown)
@@ -53,31 +46,320 @@ FetchContent_MakeAvailable(rolldown)
 target_link_libraries(my_game PRIVATE rolldown::rolldown)
 ```
 
-### Requirements
+Then describe a table, build it once, and roll it as often as you need:
 
-What does someone need installed? (compiler, C++ standard, libraries)
+```cpp
+#include <iostream>
+#include <random>
+#include "rolldown/rolldown.hpp"
 
-### Building
+using namespace rolldown;
 
-What exact commands build it?
+// 1. Describe the table: tiers, and packs of items inside each tier
+DropTableSpec spec;
+spec.tiers.emplace_back("Legendary", 3.5, std::vector<ItemPack>{
+    ItemPack({Item(1, "Sword")}, 60),
+    ItemPack({Item(2, "Axe")}, 40),
+});
+spec.tiers.emplace_back("Common", 96.5, std::vector<ItemPack>{
+    ItemPack({Item(3, "Potion")}, 90),
+    ItemPack({}, 10), // an empty pack: nothing drops
+});
 
-### Running
+// 2. Validate and build it once, at load time
+const BuildResult built = buildDropTable(spec);
+if (!built)
+{
+    std::cerr << toString(built.error) << " (tier " << built.tierIndex << ")\n";
+    return 1;
+}
 
-What command runs it, and what should they expect to see?
+// 3. Roll as often as you need
+std::mt19937_64 rng{std::random_device{}()};
+const ItemPack &drop = roll(built.table, rng);
+for (const Item &item : drop.items)
+    std::cout << "Dropped: " << item.name << "\n";
+```
 
-## Usage
+> 💡 A complete, runnable version of this code is in
+> [`examples/basic.cpp`][example_basic_url].
 
-Show, don't tell: a small, complete example from input to output.
+## How probabilities work
 
-## Config File Format
+A **table** holds **tiers**. Each tier holds **packs**. Each pack holds zero or
+more **items**, which all drop together. One roll picks exactly one pack.
 
-A reference for every keyword: what it means, what values it takes,
-and the rules it must follow.
+The chance of a pack is its tier's chance multiplied by its own chance inside
+that tier. For the table above:
 
-## How It Works
+| Pack        | Tier chance | Pack chance | Overall chance |
+| ----------- | ----------- | ----------- | -------------- |
+| Sword       | 3.5%        | 60%         | **2.1%**       |
+| Axe         | 3.5%        | 40%         | **1.4%**       |
+| Potion      | 96.5%       | 90%         | **86.85%**     |
+| _(nothing)_ | 96.5%       | 10%         | **9.65%**      |
 
-The design, explained for someone curious about the internals.
+`buildDropTable` checks these rules and tells you which one a table breaks:
+
+| Rule                                           | Error if broken       |
+| ---------------------------------------------- | --------------------- |
+| The table has at least one tier.               | `NoTiers`             |
+| Each tier has at least one pack.               | `EmptyTier`           |
+| No tier or pack chance is negative.            | `NegativeProbability` |
+| The packs in each tier add up to exactly 100%. | `ItemSumNot100`       |
+| The tiers add up to exactly 100%.              | `TierSumNot100`       |
+
+A chance of `0` is allowed (that pack never drops), and so is a pack with no
+items (a "nothing drops" result).
+
+> ❗️ Chances have **two decimal places** of precision (`3.5` and `33.33` are
+> fine). Extra decimals are rounded, so three packs of `33.333` add up to
+> `99.99` and the tier is rejected. Use `33.33`, `33.33`, `33.34` instead.
+
+## Features
+
+- **Exact percentages.** Chances are stored as integers, not floating-point
+  numbers, so a 2.1% drop is exactly 2.1%, and the "adds up to 100%" checks
+  are exact.
+- **Validated before use.** Mistakes in a table are caught at load time, with
+  an error that names the tier at fault, not in the middle of a game.
+- **Bring your own random number generator.** Pass in any 64-bit generator
+  (`std::mt19937_64`, xoshiro, PCG, your engine's own). Seed it and every drop
+  is replayable, which is useful for save files, replays, multiplayer, and tests.
+- **No exceptions.** Errors come back as values. Rolldown works in projects
+  built with exceptions turned off (`-fno-exceptions`, which Unreal uses by
+  default).
+- **No dependencies, no file format.** Rolldown takes plain C++ structs. Load
+  them from JSON, a database, a level editor, or build them in code.
+- **Fast.** One roll is a binary search over the table: _O(log n)_, about
+  5–8 ns on a modern CPU (see [benchmarks](#-tests-and-benchmarks)).
+- **Statistically tested.** The test suite rolls each test table 10 million
+  times and checks every pack's drop rate against its configured chance.
+
+## API
+
+### Functions
+
+| Function                | Returns            | Description                                                                                                                                       | When to call  |
+| ----------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `buildDropTable(spec)`  | `BuildResult`      | Checks a `DropTableSpec` against the rules above and builds a `DropTable`.                                                                        | Once, at load |
+| `roll(table, rng)`      | `const ItemPack &` | Picks one pack.                                                                                                                                   | Each drop     |
+| `rollIndex(table, rng)` | `size_t`           | Picks one pack and returns its index in `table.packs()`. Useful when the index _is_ the answer, for example an action number in machine learning. | Each drop     |
+| `toString(error)`       | `const char *`     | A readable message for a `BuildError`.                                                                                                            | On an error   |
+
+`rng` can be any generator with the standard C++ generator interface that
+produces full 64-bit values. A 32-bit generator such as `std::mt19937` is
+rejected at compile time with a clear message.
+
+### Types
+
+| Type            | Members                                        | Description                                                                |
+| --------------- | ---------------------------------------------- | -------------------------------------------------------------------------- |
+| `Item`          | `id`, `name`                                   | One item. `id` is _your_ identifier for it.                                |
+| `ItemPack`      | `items`, `probability`                         | Items that drop together, and the pack's chance inside its tier.           |
+| `TierSpec`      | `name`, `probability`, `packs`                 | A group of packs, and the tier's chance inside the table.                  |
+| `DropTableSpec` | `id`, `tiers`                                  | A full table description. `id` is your key for it (for example, an enemy). |
+| `DropTable`     | `packs()`, `size()`                            | A validated table, ready to roll. Only `buildDropTable` can make one.      |
+| `BuildResult`   | `table`, `error`, `tierIndex`, `operator bool` | The built table, or the first error and the tier that caused it.           |
+
+Packs keep the order they have in the spec: all packs of the first tier, then
+all packs of the second tier, and so on. `rollIndex` uses this order.
+
+## Loading your data
+
+Rolldown has no file format of its own. Fill in the `Spec` structs from
+whatever your game already uses.
+
+We built an example using [nlohmann/json][nlohmann_url]. Check
+[`examples/json_loader/`][example_json_url] folder for a complete, tested loader
+that you can copy into your project and change to fit your data. It:
+
+- reads from a file or from JSON already in memory,
+- never throws, even on invalid JSON,
+- reports problems with their exact location, for example
+  `A required field is missing. at /characters/0/tiers/1/probability`,
+- accepts comments in the JSON file.
+
+```cpp
+#include "json_loader.hpp"
+
+const auto loaded = rolldown_json::loadTablesFromJson("loot.json");
+if (!loaded)
+    std::cerr << rolldown_json::toString(loaded.error) << " at " << loaded.where << "\n";
+
+std::unordered_map<uint64_t, rolldown::DropTable> tables;
+for (const rolldown::DropTableSpec &spec : loaded.tables)
+{
+    rolldown::BuildResult built = rolldown::buildDropTable(spec);
+    if (built)
+        tables[spec.id] = std::move(built.table);
+}
+```
+
+The JSON shape it reads:
+
+```json
+{
+  "characters": [
+    {
+      "id": 1,
+      "tiers": [
+        {
+          "name": "Legendary",
+          "probability": 3.5,
+          "packs": [
+            { "probability": 60, "items": [{ "id": 1, "name": "Sword" }] },
+            { "probability": 40, "items": [{ "id": 2, "name": "Axe" }] }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Hooking it into your project
+
+- **Build once, roll many times.** Call `buildDropTable` when the game loads
+  its data, and keep the `DropTable`. Do not build a table on each roll.
+- **Check the result.** A `DropTable` from a failed build is empty. Rolling an
+  empty table stops with an `assert` in debug builds, and is undefined
+  behavior in release builds.
+- **Use `Item::id` as the link to your game.** Rolldown does not know what a
+  "Sword" is. Map the `id` to your own item data, prefab, or database row.
+- **Own your random number generator.** Keep one generator for each system
+  that needs its own sequence of drops. With a fixed seed, the same actions
+  give the same drops every time.
+- **Threads.** Rolling only reads a `DropTable`, so many threads can share one
+  table. A generator is not safe to share: give each thread its own.
+
+## How it works
+
+1. **Integers, not floats.** Each chance is scaled by 100 (`3.5%` becomes
+   `350`). A pack's share of the roll is _tier × pack_, out of
+   10,000 × 10,000 = **100,000,000**. All sums and checks are exact integer
+   operations.
+2. **Cutoffs at build time.** `buildDropTable` stores the running total of the
+   shares: one increasing "cutoff" value for each pack.
+3. **An unbiased random number.** Each roll gets a uniform number from
+   0 to 99,999,999 with
+   [Lemire's nearly divisionless method][lemire_url]. A plain `rng() % n` is
+   slightly biased towards smaller numbers. This method is not, and it is faster.
+4. **Binary search.** `std::upper_bound` finds the first cutoff above the
+   random number. That cutoff's pack is the result: _O(log n)_.
+5. **Cache-friendly layout.** The cutoffs are stored in their own array,
+   separate from the packs (struct-of-arrays). The search reads only cutoffs,
+   and eight of them fit in one 64-byte cache line.
+6. **Portable 128-bit math.** Lemire's method needs a 64 × 64 → 128-bit
+   multiply. Rolldown uses `unsigned __int128` on GCC and Clang, the
+   `_umul128` / `__umulh` intrinsics on MSVC, and a portable fallback on
+   other compilers.
+7. **Protected once validated.** `DropTable` keeps its data private. Only
+   `buildDropTable` can fill it, so a table that passed validation cannot be
+   changed into an invalid one.
+
+## Tests and benchmarks
+
+The tests and benchmarks use [Catch2][catch2_url], which CMake downloads
+automatically. The examples use the copies of nlohmann/json and
+[Xoshiro-cpp][xoshiro_url] in `third_party/`.
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+ctest --test-dir build --output-on-failure   # run the tests
+./build/rolldown_bench                       # run the benchmarks
+./build/rolldown_example_json                # run the JSON example
+```
+
+| Option                    | Description                         | Default                                                |
+| ------------------------- | ----------------------------------- | ------------------------------------------------------ |
+| `ROLLDOWN_BUILD_TESTS`    | Build the tests and the benchmarks. | `ON` when built directly, `OFF` inside another project |
+| `ROLLDOWN_BUILD_EXAMPLES` | Build the examples.                 | `ON` when built directly, `OFF` inside another project |
+
+**What the tests check:**
+
+- **Each validation rule**, with the error and the tier it reports.
+- **The JSON example loader**: valid files, invalid JSON, missing fields, and
+  wrong types, with the reported location of each problem.
+- **Drop rates.** Each test table is rolled 10 million times with both
+  `std::mt19937_64` and xoshiro256++. Every pack's count must be within
+  5 standard deviations of its expected count. A `0%` pack must never drop. The
+  generators use a fixed seed, so the result is the same on every run.
+
+**Benchmarks** (Apple M2 Pro, Apple Clang 16, Release build):
+
+| Time for each roll | `std::mt19937_64` | xoshiro256++ |
+| ------------------ | ----------------- | ------------ |
+| Generator only     | 4.5 ns            | 2.8 ns       |
+| Full `rollIndex`   | 7.6 ns            | 4.6 ns       |
+
+| Packs in the table        | 2      | 8      | 32     | 128    | 1000    |
+| ------------------------- | ------ | ------ | ------ | ------ | ------- |
+| `rollIndex`, xoshiro256++ | 3.4 ns | 6.8 ns | 6.4 ns | 7.6 ns | 12.0 ns |
+
+About half of each roll is the random number generator itself. A faster
+generator makes the full roll faster, with no change to Rolldown.
+
+> 🔔 So far, Rolldown has been built and tested with Apple Clang on macOS,
+> with strict warnings turned on (`-Wall -Wextra -Wpedantic -Wconversion`).
+> The GCC and MSVC code paths are written but not yet verified by CI.
+
+## Design decisions
+
+- **Errors are values, not exceptions,** so that Rolldown works in game
+  engines that turn exceptions off. `BuildResult` works like C++23's
+  `std::expected`, but needs only C++17.
+- **The caller owns the random number generator,** so that drops can be
+  seeded, replayed, and tested, and so that a faster generator needs no
+  library change.
+- **`DropTable` is a class, and the `Spec` types are structs.** An invalid
+  spec is allowed to exist, because the builder reports it. An invalid built
+  table must never exist, so its data is private.
+- **The JSON loader is an example, not part of the library.** A file format is
+  a decision for each game. The library takes plain structs, and the example
+  shows one way to fill them.
+- **Designed for C++17** Many game projects still use C++17, and a header-only
+  library can only be used by projects with the same standard or newer.
 
 ## Roadmap
 
-What's planned, or not done yet?
+- **Pity system:** guarantee a drop after a set number of rolls without it.
+  Optional, for each item.
+- **Tierless tables:** set each pack's overall chance directly, with no tiers.
+- **Roll counts:** let a table decide how many rolls to make, with a chance for
+  each count.
+- **Alias method:** _O(1)_ rolls for very large tables.
+- **CI:** build and test on GCC, Clang, and MSVC for each commit.
+
+## License
+
+Rolldown is free and open-source software under the [MIT License][license_url].
+
+The tests, benchmarks, and examples use [Catch2][catch2_url] (BSL-1.0),
+[nlohmann/json][nlohmann_url] (MIT), and [Xoshiro-cpp][xoshiro_url] (MIT). The
+library itself does not use them.
+
+<!-- Badges -->
+
+[cpp_img]: https://img.shields.io/badge/C%2B%2B-17-00599C?style=for-the-badge&logo=cplusplus
+[cpp_url]: https://en.cppreference.com/w/cpp/17
+[header_only_img]: https://img.shields.io/badge/header--only-yes-success?style=for-the-badge&logo=none
+[deps_img]: https://img.shields.io/badge/dependencies-none-success?style=for-the-badge&logo=none
+[license_img]: https://img.shields.io/badge/license-MIT-blue?style=for-the-badge&logo=none
+
+<!-- Repository -->
+
+[repo_url]: https://github.com/ketchikan/dropRate
+[license_url]: https://github.com/ketchikan/dropRate/blob/main/LICENSE
+[include_url]: https://github.com/ketchikan/dropRate/tree/main/include/rolldown
+[example_basic_url]: https://github.com/ketchikan/dropRate/blob/main/examples/basic.cpp
+[example_json_url]: https://github.com/ketchikan/dropRate/tree/main/examples/json_loader
+[lessons_url]: https://github.com/ketchikan/dropRate/blob/main/docs/LESSONS.md
+
+<!-- Other projects -->
+
+[catch2_url]: https://github.com/catchorg/Catch2
+[nlohmann_url]: https://github.com/nlohmann/json
+[xoshiro_url]: https://github.com/Reputeless/Xoshiro-cpp
+[lemire_url]: https://arxiv.org/abs/1805.10941
