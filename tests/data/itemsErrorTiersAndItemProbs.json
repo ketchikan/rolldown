@@ -1,0 +1,225 @@
+{
+  "characters": [
+    {
+      "id": 1,
+      "tiers": [
+        {
+          "name": "Legendary",
+          "probability": 5,
+          "packs": [
+            {
+              "probability": 60,
+              "items": [
+                {
+                  "id": 1,
+                  "name": "Sword"
+                }
+              ]
+            },
+            {
+              "probability": 40,
+              "items": [
+                {
+                  "id": 2,
+                  "name": "Axe"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Rare",
+          "probability": 20,
+          "packs": [
+            {
+              "probability": 50,
+              "items": [
+                {
+                  "id": 3,
+                  "name": "Bow"
+                }
+              ]
+            },
+            {
+              "probability": 50,
+              "items": [
+                {
+                  "id": 4,
+                  "name": "Shield"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Common",
+          "probability": 76.5,
+          "packs": [
+            {
+              "probability": 100,
+              "items": [
+                {
+                  "id": 5,
+                  "name": "Potion"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": 2,
+      "tiers": [
+        {
+          "name": "Legendary",
+          "probability": 3.5,
+          "packs": [
+            {
+              "probability": 70,
+              "items": [
+                {
+                  "id": 1,
+                  "name": "Sword"
+                }
+              ]
+            },
+            {
+              "probability": 40,
+              "items": [
+                {
+                  "id": 2,
+                  "name": "Axe"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Rare",
+          "probability": 20,
+          "packs": [
+            {
+              "probability": 50,
+              "items": [
+                {
+                  "id": 3,
+                  "name": "Bow"
+                }
+              ]
+            },
+            {
+              "probability": 50,
+              "items": [
+                {
+                  "id": 4,
+                  "name": "Shield"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Common",
+          "probability": 76.5,
+          "packs": [
+            {
+              "probability": 80,
+              "items": [
+                {
+                  "id": 5,
+                  "name": "Potion"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": 3,
+      "tiers": [
+        {
+          "name": "Legendary",
+          "probability": 10,
+          "packs": [
+            {
+              "probability": 60,
+              "items": [
+                {
+                  "id": 1,
+                  "name": "Sword"
+                }
+              ]
+            },
+            {
+              "probability": 40,
+              "items": [
+                {
+                  "id": 1,
+                  "name": "Sword"
+                },
+                {
+                  "id": 2,
+                  "name": "Axe"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Rare",
+          "probability": 20,
+          "packs": [
+            {
+              "probability": 50,
+              "items": [
+                {
+                  "id": 3,
+                  "name": "Bow"
+                }
+              ]
+            },
+            {
+              "probability": 50,
+              "items": [
+                {
+                  "id": 4,
+                  "name": "Shield"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Common",
+          "probability": 76.5,
+          "packs": [
+            {
+              "probability": -10,
+              "items": [
+                {
+                  "id": 5,
+                  "name": "Potion"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": 4,
+      "tiers": [
+        {
+          "name": "Legendary",
+          "probability": 10,
+          "packs": []
+        }
+      ]
+    }
+  ]
+}

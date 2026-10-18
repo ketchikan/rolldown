@@ -14,7 +14,7 @@ inline rolldown::DropTableSpec makeSpec(const std::vector<std::pair<double, std:
     {
         std::vector<rolldown::ItemPack> packs;
         for (double p : packPercents)
-            packs.emplace_back(std::vector<rolldown::Item>{rolldown::Item("item")}, p);
+            packs.emplace_back(std::vector<rolldown::Item>{rolldown::Item(1, "item")}, p);
         spec.tiers.emplace_back("tier", tierPercent, packs);
     }
     return spec;

@@ -28,11 +28,9 @@ namespace rolldown
         uint64_t id; // Just generalizing for now, this should be sized like how we size ENUM's
         std::string name;
 
-        Item(const std::string_view &name) : id(nextId++), name(name) {}               // For our custom loader
-        Item(const uint64_t &id, const std::string_view &name) : id(id), name(name) {} // For our JSON loader
+        Item(const uint64_t &id, const std::string_view &name) : id(id), name(name) {}
 
     private:
-        inline static uint64_t nextId = 1; // TODO once the JSON loader is finished, dump this.
     };
 
     /*
@@ -42,7 +40,6 @@ namespace rolldown
      */
     struct ItemPack
     {
-        // TODO Is it possible to call this without a constructor, or will it not let you? I want it to be required.
         std::vector<Item> items;
         double probability;
 
@@ -62,21 +59,17 @@ namespace rolldown
      */
     struct TierSpec
     {
-        // TODO Once I have the JSON loader finished, I will modify the constructors to take in the ID number.
-        // TODO Do I even need something like a Tier ID?
-        uint64_t id;
         std::string name;
         double probability;
         std::vector<ItemPack> packs;
 
         // Construct without ItemPack vector
-        TierSpec(const std::string &name, const double &probability) : id(nextId++), name(name), probability(probability) {}
+        TierSpec(const std::string &name, const double &probability) : name(name), probability(probability) {}
 
         // Construct with ItemPack vector
-        TierSpec(const std::string &name, const double &probability, const std::vector<ItemPack> &itemPacks) : id(nextId++), name(name), probability(probability), packs(itemPacks) {}
+        TierSpec(const std::string &name, const double &probability, const std::vector<ItemPack> &itemPacks) : name(name), probability(probability), packs(itemPacks) {}
 
     private:
-        inline static uint64_t nextId = 1;
     };
 
     // /*

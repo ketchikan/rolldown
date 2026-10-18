@@ -10,15 +10,6 @@
 using rolldown::LoadError;
 using rolldown::parseTables;
 
-static std::vector<std::string> sortedNames(const rolldown::ItemPack &pack)
-{
-    std::vector<std::string> names;
-    for (const auto &item : pack.items)
-        names.push_back(item.name);
-    std::sort(names.begin(), names.end());
-    return names;
-}
-
 TEST_CASE("the JSON loader reads a table file", "[json]")
 {
     const auto loaded = rolldown::loadTablesFromJson(ROLLDOWN_TEST_DATA "/items3.json");
@@ -35,44 +26,6 @@ TEST_CASE("the JSON loader reads a table file", "[json]")
     CHECK(spec.tiers[0].packs[1].items[1].id == 2);
     CHECK(spec.tiers[0].packs[1].items[1].name == "Axe");
     CHECK(rolldown::buildDropTable(spec));
-}
-
-// The text files are the reference: each JSON file must describe the same tables.
-TEST_CASE("the JSON and text loaders agree", "[json]")
-{
-    for (const std::string name : {"items1", "items2", "items3", "items4", "itemsCompensatingTiers"})
-    {
-        DYNAMIC_SECTION(name)
-        {
-            const auto fromText = rolldown::loadTables(ROLLDOWN_TEST_DATA "/" + name + ".txt");
-            const auto fromJson = rolldown::loadTablesFromJson(ROLLDOWN_TEST_DATA "/" + name + ".json");
-            REQUIRE(fromJson);
-            REQUIRE(fromJson.tables.size() == fromText.size());
-
-            for (size_t c = 0; c < fromText.size(); ++c)
-            {
-                const auto &a = fromText[c];
-                const auto &b = fromJson.tables[c];
-                REQUIRE(a.tiers.size() == b.tiers.size());
-                for (size_t t = 0; t < a.tiers.size(); ++t)
-                {
-                    INFO("character " << c << ", tier " << t);
-                    CHECK(a.tiers[t].probability == b.tiers[t].probability);
-                    REQUIRE(a.tiers[t].packs.size() == b.tiers[t].packs.size());
-                    for (size_t p = 0; p < a.tiers[t].packs.size(); ++p)
-                    {
-                        const auto &packA = a.tiers[t].packs[p];
-                        const auto &packB = b.tiers[t].packs[p];
-                        INFO("pack " << p);
-                        CHECK(packA.probability == packB.probability);
-                        // A pack drops all its items together, so their order does not matter.
-                        // Compare names only: text-loader IDs come from a counter.
-                        CHECK(sortedNames(packA) == sortedNames(packB));
-                    }
-                }
-            }
-        }
-    }
 }
 
 TEST_CASE("JSON problems report the error and where it is", "[json]")

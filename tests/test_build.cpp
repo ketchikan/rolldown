@@ -50,9 +50,12 @@ TEST_CASE("invalid specs report the right error and tier", "[build]")
 
 TEST_CASE("the loader reads a table file", "[loader]")
 {
-    SECTION("load from items3.txt")
+    SECTION("load from items3.json")
     {
-        const auto specs = rolldown::loadTables(ROLLDOWN_TEST_DATA "/items3.txt");
+        const auto results = rolldown::loadTablesFromJson(ROLLDOWN_TEST_DATA "/items3.json");
+
+        REQUIRE(results.error == rolldown::LoadError::None);
+        const auto specs = results.tables;
 
         REQUIRE(specs.size() == 1);
         REQUIRE(specs[0].tiers.size() == 3);
@@ -61,9 +64,14 @@ TEST_CASE("the loader reads a table file", "[loader]")
         CHECK(buildDropTable(specs[0]));
     }
 
-    SECTION("load from itemsErrorTiersAndItemProbs.txt")
+    SECTION("load from itemsErrorTiersAndItemProbs.json")
     {
-        const auto specs = rolldown::loadTables(ROLLDOWN_TEST_DATA "/itemsErrorTiersAndItemProbs.txt");
+        const auto results = rolldown::loadTablesFromJson(ROLLDOWN_TEST_DATA "/itemsErrorTiersAndItemProbs.json");
+
+        REQUIRE(results.error == rolldown::LoadError::None);
+
+        const auto specs = results.tables;
+
         REQUIRE(specs.size() == 4);
 
         const auto specResult1 = buildDropTable(specs[0]);
