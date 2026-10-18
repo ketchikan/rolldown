@@ -4,15 +4,16 @@
 #include <string>
 #include <vector>
 
-#include "rolldown/json_loader.hpp"
 #include "rolldown/rolldown.hpp"
+#include "json_loader.hpp"
 
-using rolldown::LoadError;
-using rolldown::parseTables;
+using rolldown_json::LoadError;
+using rolldown_json::loadTablesFromJson;
+using rolldown_json::parseTables;
 
 TEST_CASE("the JSON loader reads a table file", "[json]")
 {
-    const auto loaded = rolldown::loadTablesFromJson(ROLLDOWN_TEST_DATA "/items3.json");
+    const auto loaded = loadTablesFromJson(ROLLDOWN_TEST_DATA "/items3.json");
 
     REQUIRE(loaded);
     REQUIRE(loaded.tables.size() == 1);
@@ -32,12 +33,12 @@ TEST_CASE("JSON problems report the error and where it is", "[json]")
 {
     SECTION("the file does not exist")
     {
-        const auto loaded = rolldown::loadTablesFromJson(ROLLDOWN_TEST_DATA "/does_not_exist.json");
+        const auto loaded = loadTablesFromJson(ROLLDOWN_TEST_DATA "/does_not_exist.json");
         CHECK(loaded.error == LoadError::FileNotFound);
     }
     SECTION("the text is not JSON")
     {
-        const auto loaded = rolldown::loadTablesFromJson(ROLLDOWN_TEST_DATA "/invalid.json");
+        const auto loaded = loadTablesFromJson(ROLLDOWN_TEST_DATA "/invalid.json");
         CHECK(loaded.error == LoadError::InvalidJson);
     }
     SECTION("no characters array")

@@ -2,9 +2,13 @@
 
 #include "rolldown/rolldown.hpp"
 #include "spec_helpers.hpp"
+#include "json_loader.hpp"
 
 using rolldown::buildDropTable;
 using rolldown::BuildError;
+using rolldown_json::LoadError;
+using rolldown_json::loadTablesFromJson;
+using rolldown_json::parseTables;
 
 TEST_CASE("a valid spec builds", "[build]")
 {
@@ -52,9 +56,9 @@ TEST_CASE("the loader reads a table file", "[loader]")
 {
     SECTION("load from items3.json")
     {
-        const auto results = rolldown::loadTablesFromJson(ROLLDOWN_TEST_DATA "/items3.json");
+        const auto results = loadTablesFromJson(ROLLDOWN_TEST_DATA "/items3.json");
 
-        REQUIRE(results.error == rolldown::LoadError::None);
+        REQUIRE(results.error == LoadError::None);
         const auto specs = results.tables;
 
         REQUIRE(specs.size() == 1);
@@ -66,9 +70,9 @@ TEST_CASE("the loader reads a table file", "[loader]")
 
     SECTION("load from itemsErrorTiersAndItemProbs.json")
     {
-        const auto results = rolldown::loadTablesFromJson(ROLLDOWN_TEST_DATA "/itemsErrorTiersAndItemProbs.json");
+        const auto results = loadTablesFromJson(ROLLDOWN_TEST_DATA "/itemsErrorTiersAndItemProbs.json");
 
-        REQUIRE(results.error == rolldown::LoadError::None);
+        REQUIRE(results.error == LoadError::None);
 
         const auto specs = results.tables;
 

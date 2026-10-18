@@ -11,10 +11,14 @@
 
 #include <nlohmann/json.hpp>
 
-#include "types.hpp"
+#include "rolldown/types.hpp"
 
-namespace rolldown
+namespace rolldown_json
 {
+    using rolldown::DropTableSpec;
+    using rolldown::Item;
+    using rolldown::ItemPack;
+    using rolldown::TierSpec;
     /*
     @enum LoadError
 
@@ -280,4 +284,4 @@ namespace rolldown
         return parseTables(root);
     }
 
-} // namespace rolldown
+} // namespace rolldown_json

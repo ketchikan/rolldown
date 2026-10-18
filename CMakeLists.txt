@@ -41,6 +41,7 @@ if(ROLLDOWN_BUILD_TESTS)
 
     add_executable(rolldown_tests tests/test_build.cpp tests/test_distribution.cpp tests/test_json_loader.cpp)
     target_link_libraries(rolldown_tests PRIVATE rolldown_dev)
+    target_include_directories(rolldown_tests PRIVATE examples/json_loader)
 
     add_executable(rolldown_bench bench/bench.cpp)
     target_link_libraries(rolldown_bench PRIVATE rolldown_dev)
@@ -49,4 +50,14 @@ if(ROLLDOWN_BUILD_TESTS)
     enable_testing()
     include(Catch)
     catch_discover_tests(rolldown_tests)
+endif()
+
+
+option(ROLLDOWN_BUILD_EXAMPLES "Build the rolldown examples" ${PROJECT_IS_TOP_LEVEL})
+
+if(ROLLDOWN_BUILD_EXAMPLES)
+    add_executable(rolldown_example_json examples/json_loader/main.cpp)
+    target_link_libraries(rolldown_example_json PRIVATE rolldown::rolldown)
+    target_include_directories(rolldown_example_json PRIVATE third_party) # nlohmann/json
+    target_compile_definitions(rolldown_example_json PRIVATE ROLLDOWN_EXAMPLE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/examples/json_loader")
 endif()
