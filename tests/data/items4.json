@@ -1,0 +1,288 @@
+{
+  "characters": [
+    {
+      "id": 1,
+      "tiers": [
+        {
+          "id": 1,
+          "name": "default",
+          "probability": 100,
+          "packs": [
+            {
+              "id": 1,
+              "probability": 100,
+              "items": [
+                {
+                  "id": 1,
+                  "name": "Sword"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": 2,
+      "tiers": [
+        {
+          "id": 1,
+          "name": "Legendary",
+          "probability": 3.5,
+          "packs": [
+            {
+              "id": 1,
+              "probability": 60,
+              "items": [
+                {
+                  "id": 1,
+                  "name": "Sword"
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "probability": 40,
+              "items": [
+                {
+                  "id": 2,
+                  "name": "Axe"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Rare",
+          "probability": 20,
+          "packs": [
+            {
+              "id": 3,
+              "probability": 50,
+              "items": [
+                {
+                  "id": 3,
+                  "name": "Bow"
+                }
+              ]
+            },
+            {
+              "id": 4,
+              "probability": 50,
+              "items": [
+                {
+                  "id": 4,
+                  "name": "Shield"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Common",
+          "probability": 76.5,
+          "packs": [
+            {
+              "id": 5,
+              "probability": 100,
+              "items": [
+                {
+                  "id": 5,
+                  "name": "Potion"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": 3,
+      "tiers": [
+        {
+          "id": 1,
+          "name": "Legendary",
+          "probability": 3.5,
+          "packs": [
+            {
+              "id": 1,
+              "probability": 60,
+              "items": [
+                {
+                  "id": 1,
+                  "name": "Sword"
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "probability": 40,
+              "items": [
+                {
+                  "id": 1,
+                  "name": "Sword"
+                },
+                {
+                  "id": 2,
+                  "name": "Axe"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Rare",
+          "probability": 20,
+          "packs": [
+            {
+              "id": 3,
+              "probability": 50,
+              "items": [
+                {
+                  "id": 3,
+                  "name": "Bow"
+                }
+              ]
+            },
+            {
+              "id": 4,
+              "probability": 50,
+              "items": [
+                {
+                  "id": 4,
+                  "name": "Shield"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Common",
+          "probability": 76.5,
+          "packs": [
+            {
+              "id": 5,
+              "probability": 100,
+              "items": [
+                {
+                  "id": 5,
+                  "name": "Potion"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": 4,
+      "tiers": [
+        {
+          "id": 1,
+          "name": "Legendary",
+          "probability": 10,
+          "packs": [
+            {
+              "id": 1,
+              "probability": 25,
+              "items": [
+                {
+                  "id": 6,
+                  "name": "Staff"
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "probability": 75,
+              "items": [
+                {
+                  "id": 7,
+                  "name": "Scroll"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Rare",
+          "probability": 17.5,
+          "packs": [
+            {
+              "id": 8,
+              "probability": 60,
+              "items": [
+                {
+                  "id": 8,
+                  "name": "Lance"
+                }
+              ]
+            },
+            {
+              "id": 9,
+              "probability": 40,
+              "items": [
+                {
+                  "id": 9,
+                  "name": "Mace"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Uncommon",
+          "probability": 32.5,
+          "packs": [
+            {
+              "id": 1,
+              "probability": 50,
+              "items": [
+                {
+                  "id": 3,
+                  "name": "Bow"
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "probability": 50,
+              "items": [
+                {
+                  "id": 1,
+                  "name": "Sword"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Common",
+          "probability": 40,
+          "packs": [
+            {
+              "id": 1,
+              "probability": 100,
+              "items": [
+                {
+                  "id": 5,
+                  "name": "Potion"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

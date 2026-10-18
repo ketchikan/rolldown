@@ -39,7 +39,7 @@ if(ROLLDOWN_BUILD_TESTS)
         $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Wconversion>
     )
 
-    add_executable(rolldown_tests tests/test_build.cpp tests/test_distribution.cpp)
+    add_executable(rolldown_tests tests/test_build.cpp tests/test_distribution.cpp tests/test_json_loader.cpp)
     target_link_libraries(rolldown_tests PRIVATE rolldown_dev)
 
     add_executable(rolldown_bench bench/bench.cpp)

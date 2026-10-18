@@ -1,0 +1,26 @@
+{
+  "characters": [
+    {
+      "id": 1,
+      "tiers": [
+        {
+          "id": 1,
+          "name": "default",
+          "probability": 100,
+          "packs": [
+            {
+              "id": 1,
+              "probability": 100,
+              "items": [
+                {
+                  "id": 1,
+                  "name": "Sword"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

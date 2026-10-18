@@ -11,8 +11,7 @@
 
 #include "types.hpp"
 
-// TODO Convert this to JSON based loading, which is much more common in game dev.
-// TODO I should also write about how you just need to get it in the correct structure then you're set
+// TODO Remove this text loader once the JSON loader (json_loader.hpp) has replaced it everywhere.
 
 namespace rolldown
 {

@@ -1,0 +1,53 @@
+{
+  "characters": [
+    {
+      "id": 1,
+      "tiers": [
+        {
+          "id": 1,
+          "name": "A",
+          "probability": 50,
+          "packs": [
+            {
+              "id": 1,
+              "probability": 70,
+              "items": [
+                {
+                  "id": 1,
+                  "name": "Sword"
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "probability": 50,
+              "items": [
+                {
+                  "id": 1,
+                  "name": "Shield"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "name": "B",
+          "probability": 50,
+          "packs": [
+            {
+              "id": 1,
+              "probability": 80,
+              "items": [
+                {
+                  "id": 1,
+                  "name": "Bow"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

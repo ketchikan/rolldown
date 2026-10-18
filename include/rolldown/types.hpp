@@ -19,22 +19,30 @@ namespace rolldown
     // - If I determine a maximum size for each of these, I can declare those sizes and use that instead in a cstyle array or a c++ style array
 
     /*
+    @struct Item
+
+    @brief Represents a single item, storing an ID and a name.
      */
     struct Item
     {
         uint64_t id; // Just generalizing for now, this should be sized like how we size ENUM's
         std::string name;
 
-        Item(const std::string_view &name) : id(nextId++), name(name) {}
+        Item(const std::string_view &name) : id(nextId++), name(name) {}               // For our custom loader
+        Item(const uint64_t &id, const std::string_view &name) : id(id), name(name) {} // For our JSON loader
 
     private:
-        inline static uint64_t nextId = 1;
+        inline static uint64_t nextId = 1; // TODO once the JSON loader is finished, dump this.
     };
 
     /*
+    @struct ItemPack
+
+    @brief A collection of 1+ `Item` objects. Stores the `Item` objects in a vector, and a probability of the pack being selected.
      */
     struct ItemPack
     {
+        // TODO Is it possible to call this without a constructor, or will it not let you? I want it to be required.
         std::vector<Item> items;
         double probability;
 
@@ -46,9 +54,16 @@ namespace rolldown
     };
 
     /*
+    @struct TierSpec
+
+    @brief A description of a single Tier inside a drop table.
+
+    Stores a tier ID, the name of the tier, the probability of the tier being selected, and a vector of `ItemPack` objects.
      */
     struct TierSpec
     {
+        // TODO Once I have the JSON loader finished, I will modify the constructors to take in the ID number.
+        // TODO Do I even need something like a Tier ID?
         uint64_t id;
         std::string name;
         double probability;
@@ -76,10 +91,14 @@ namespace rolldown
     // };
 
     /*
+    @struct DropTableSpec
+
+    @brief A collection of `TierSpec` objects that comprise a single item drop table.
      */
     struct DropTableSpec
     {
         // std::vector<NumberDrops> numDrops;
+        uint64_t id = 0; // The game's key for this table (for example, a character ID). 0 if the source has none.
         std::vector<TierSpec> tiers;
     };
 
