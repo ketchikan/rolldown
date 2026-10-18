@@ -8,8 +8,6 @@
 [![License][license_img]][license_url]
 [![CI][ci_img]][ci_url]
 [![Compiler Tests][compilers_img]]
-[ci_img]: https://img.shields.io/github/actions/workflow/status/ketchikan/dropRate/ci.yml?branch=main&style=for-the-badge&label=CI
-[ci_url]: https://github.com/ketchikan/dropRate/actions/workflows/ci.yml
 
 A header-only C++17 library for **weighted random selection**: loot drops, enemy
 actions, procedural generation, or any time one option must be picked from
