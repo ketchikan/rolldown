@@ -37,9 +37,10 @@ namespace rolldown
         None,
         NoTiers,
         EmptyTier,
-        NegativeProbability,
         TierSumNot100,
         ItemSumNot100,
+        OutOfRange,
+        TooPrecise,
     };
 
     /*
@@ -76,12 +77,14 @@ namespace rolldown
             return "No Tiers defined; please include at least 1 tier holding at least 1 item.";
         case BuildError::EmptyTier:
             return "A tier was identified that held no Item. Please ensure all tiers hold at least 1 item.";
-        case BuildError::NegativeProbability:
-            return "A tier or item was defined with a negative probability. Please ensure all probabilities are defined as positive integers or floats between 0 - 100.";
         case BuildError::TierSumNot100:
             return "The sum of probabilities of the defined tiers is not equal to 100%.";
         case BuildError::ItemSumNot100:
             return "The sum of probabilities for items within a single tier is not equal to 100%.";
+        case BuildError::OutOfRange:
+            return "The tier or item was defined with a probability outside the range of (0,100).";
+        case BuildError::TooPrecise:
+            return "The tier or item was defined with more than two decimal places of precision.";
         }
         return "Unknown error."; // Moved out of the default because if I later add a new error type to the enum then it will throw an error through the compiler, which is handy.
     }
@@ -108,6 +111,8 @@ namespace rolldown
     inline BuildResult buildDropTable(const DropTableSpec &spec)
     {
         BuildResult r;
+
+        // LAMBDAS
         auto fail = [&r](BuildError error, size_t tier = 0)
         {
             r.table.packs_.clear();
@@ -136,10 +141,16 @@ namespace rolldown
                 return fail(BuildError::EmptyTier, t);
             }
 
-            // Validate that tier probability is >0
-            if (tier.probability < 0)
+            // Validate that the probability is within the range
+            if (!(tier.probability >= 0.0 && tier.probability <= 100.0)) // written this way so NaN fails too (every comparison with NaN is false)
             {
-                return fail(BuildError::NegativeProbability, t);
+                return fail(BuildError::OutOfRange, t);
+            }
+
+            // Validate if the defined probability is too precise
+            if (std::abs(tier.probability * PERCENT_SCALE - std::round(tier.probability * PERCENT_SCALE)) > 1e-6)
+            {
+                return fail(BuildError::TooPrecise, t);
             }
 
             // Convert tier probability
@@ -149,10 +160,16 @@ namespace rolldown
             uint64_t itemProbSum = 0;
             for (const auto &pack : tier.packs)
             {
-                // Validate that the pack has a probability >0
-                if (pack.probability < 0)
+                // Validate that the probability is within the range
+                if (!(pack.probability >= 0.0 && pack.probability <= 100.0)) // written this way so NaN fails too (every comparison with NaN is false)
                 {
-                    return fail(BuildError::NegativeProbability, t);
+                    return fail(BuildError::OutOfRange, t);
+                }
+
+                // Validate if the defined probability is too precise
+                if (std::abs(pack.probability * PERCENT_SCALE - std::round(pack.probability * PERCENT_SCALE)) > 1e-6)
+                {
+                    return fail(BuildError::TooPrecise, t);
                 }
 
                 // Conver item probability

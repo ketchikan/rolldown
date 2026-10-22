@@ -4,6 +4,8 @@
 #include "spec_helpers.hpp"
 #include "json_loader.hpp"
 
+// RUN: ctest --test-dir build --output-on-failure
+
 using rolldown::buildDropTable;
 using rolldown::BuildError;
 using rolldown_json::LoadError;
@@ -32,13 +34,13 @@ TEST_CASE("invalid specs report the right error and tier", "[build]")
     }
     SECTION("a negative pack probability")
     {
-        const auto result = buildDropTable(makeSpec({{100, {110, -10}}}));
-        CHECK(result.error == BuildError::NegativeProbability);
+        const auto result = buildDropTable(makeSpec({{100, {-10, 110}}}));
+        CHECK(result.error == BuildError::OutOfRange);
     }
     SECTION("a negative tier probability")
     {
         const auto result = buildDropTable(makeSpec({{-100, {110, 10}}}));
-        CHECK(result.error == BuildError::NegativeProbability);
+        CHECK(result.error == BuildError::OutOfRange);
     }
     SECTION("tiers that don't add up to 100%")
     {
@@ -49,6 +51,26 @@ TEST_CASE("invalid specs report the right error and tier", "[build]")
         const auto result = buildDropTable(makeSpec({{50, {60, 60}}, {50, {40, 40}}}));
         CHECK(result.error == BuildError::ItemSumNot100);
         CHECK(result.tierIndex == 0);
+    }
+    SECTION("item pack probability defined as NaN")
+    {
+        const auto result = buildDropTable(makeSpec({{100, {NAN, 100}}}));
+        CHECK(result.error == BuildError::OutOfRange);
+    }
+    SECTION("item tier probability defined as NaN")
+    {
+        const auto result = buildDropTable(makeSpec({{100, {100}}, {NAN, {100}}}));
+        CHECK(result.error == BuildError::OutOfRange);
+    }
+    SECTION("item pack probability has too much precision (3+ decimal places)")
+    {
+        const auto result = buildDropTable(makeSpec({{50, {99.999, 0.001}}, {50, {0.001, 99.999}}}));
+        CHECK(result.error == BuildError::TooPrecise);
+    }
+    SECTION("item tier probability has too much precision (3+ decimal places)")
+    {
+        const auto result = buildDropTable(makeSpec({{99.999, {100}}, {0.001, {100}}}));
+        CHECK(result.error == BuildError::TooPrecise);
     }
 }
 
@@ -85,7 +107,7 @@ TEST_CASE("the loader reads a table file", "[loader]")
         CHECK(specResult2.error == BuildError::ItemSumNot100);
 
         const auto specResult3 = buildDropTable(specs[2]);
-        CHECK(specResult3.error == BuildError::NegativeProbability);
+        CHECK(specResult3.error == BuildError::OutOfRange);
 
         const auto specResult4 = buildDropTable(specs[3]);
         CHECK(specResult4.error == BuildError::EmptyTier);
