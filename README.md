@@ -103,13 +103,14 @@ that tier. For the table above:
 
 `buildDropTable` checks these rules and tells you which one a table breaks:
 
-| Rule                                           | Error if broken       |
-| ---------------------------------------------- | --------------------- |
-| The table has at least one tier.               | `NoTiers`             |
-| Each tier has at least one pack.               | `EmptyTier`           |
-| No tier or pack chance is negative.            | `NegativeProbability` |
-| The packs in each tier add up to exactly 100%. | `ItemSumNot100`       |
-| The tiers add up to exactly 100%.              | `TierSumNot100`       |
+| Rule                                                      | Error if broken |
+| --------------------------------------------------------- | --------------- |
+| The table has at least one tier.                          | `NoTiers`       |
+| Each tier has at least one pack.                          | `EmptyTier`     |
+| No tier or pack chance is outside the 0-100 range.        | `OutOfRange`    |
+| No tier or pack chance has 3+ decimal places of precision | `TooPrecise`    |
+| The packs in each tier add up to exactly 100%.            | `ItemSumNot100` |
+| The tiers add up to exactly 100%.                         | `TierSumNot100` |
 
 A chance of `0` is allowed (that pack never drops), and so is a pack with no
 items (a "nothing drops" result).
