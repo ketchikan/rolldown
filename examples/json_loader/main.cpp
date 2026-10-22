@@ -22,7 +22,7 @@ static void rollTenTimes(const rolldown::DropTableSpec &spec, std::mt19937_64 &r
     for (int i = 0; i < 10; ++i)
     {
         const rolldown::ItemPack &pack = rolldown::roll(built.table, rng);
-        std::cout << (pack.items.empty() ? " (nothing)" : " " + pack.items[0].name);
+        std::cout << (pack.items.empty() ? " (nothing)" : " " + std::to_string(pack.items[0].id));
     }
     std::cout << "\n";
 }

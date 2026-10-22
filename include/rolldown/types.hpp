@@ -26,9 +26,9 @@ namespace rolldown
     struct Item
     {
         uint64_t id; // Just generalizing for now, this should be sized like how we size ENUM's
-        std::string name;
+        // std::string name;
 
-        Item(const uint64_t &id, const std::string_view &name) : id(id), name(name) {}
+        Item(const uint64_t &id) : id(id) {}
 
     private:
     };

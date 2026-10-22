@@ -147,11 +147,11 @@ namespace rolldown_json
             const auto *id = getField(j, "id", JsonType::UnsignedInt, path, r);
             if (!id)
                 return false;
-            const auto *name = getField(j, "name", JsonType::String, path, r);
-            if (!name)
-                return false;
+            // const auto *name = getField(j, "name", JsonType::String, path, r);
+            // if (!name)
+            //     return false;
 
-            out.emplace_back(id->get<uint64_t>(), name->get<std::string>());
+            out.emplace_back(id->get<uint64_t>());
             return true;
         }
 
