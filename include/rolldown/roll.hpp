@@ -108,8 +108,15 @@ namespace rolldown
         // First cutoff strictly greater than the roll is the item we landed in
         // This is now O(log n) instead of O(n)
 
-        const auto it = std::upper_bound(cutoffs.begin(), cutoffs.end(), roll);
-        return static_cast<size_t>(it - cutoffs.begin());
+        const uint64_t *base = cutoffs.data(); // TODO change to uint32_t
+        size_t len = cutoffs.size();
+        while (len > 1)
+        {
+            const size_t half = len / 2;
+            base = (base[half - 1] <= roll) ? base + half : base; // A select instead of a branch
+            len -= half;
+        }
+        return static_cast<size_t>(base - cutoffs.data()) + (*base <= roll);
     }
 
     /*
