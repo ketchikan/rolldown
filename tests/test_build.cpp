@@ -80,13 +80,20 @@ TEST_CASE("a batch gives the same rolls as single calls", "[roll]")
 {
     const auto built = buildDropTable(makeSpec({{100, {25, 75}}}));
     REQUIRE(built);
-    std::mt19937_64 a{42}, b{42};
+    std::mt19937_64 a{42}, b{42}, c{42};
 
     std::vector<size_t> single;
     for (int i = 0; i < 1000; ++i)
         single.push_back(rolldown::rollIndex(built.table, a));
 
+    // Check version 1: return a std::vector
     CHECK(rolldown::rollIndexes(built.table, b, 1000) == single);
+
+    // Check version 2: updates an existing iterator
+    std::vector<size_t> multiple;
+    multiple.reserve(1000);
+    rolldown::rollIndexes(built.table, c, 1000, std::back_inserter(multiple));
+    CHECK(multiple == single);
 }
 
 TEST_CASE("the loader reads a table file", "[loader]")
