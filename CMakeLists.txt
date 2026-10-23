@@ -25,7 +25,7 @@ option(ROLLDOWN_SANITIZE "Build our own tests and examples with ASan and UBSan (
 add_library(rolldown_options INTERFACE)
 target_compile_options(rolldown_options INTERFACE
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive->
-    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Wconversion>
+    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Wconversion -Wshadow>
 )
 if(ROLLDOWN_WARNINGS_AS_ERRORS)
     target_compile_options(rolldown_options INTERFACE

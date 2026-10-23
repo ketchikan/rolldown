@@ -23,9 +23,8 @@ namespace rolldown
     struct Item
     {
         uint64_t id; // Just generalizing for now, this should be sized like how we size ENUM's
-        // std::string name;
 
-        Item(const uint64_t id) : id(id) {}
+        Item(const uint64_t InId) : id(InId) {}
     };
 
     /**
@@ -39,10 +38,10 @@ namespace rolldown
         double probability;
 
         // Initialize with a default probability of 100%
-        ItemPack(const std::vector<Item> items) : items(std::move(items)), probability(100.0) {}
+        ItemPack(const std::vector<Item> InItems) : items(std::move(InItems)), probability(100.0) {}
 
         // Initialize with a specified probability
-        ItemPack(const std::vector<Item> items, const double probability) : items(std::move(items)), probability(probability) {}
+        ItemPack(const std::vector<Item> InItems, const double InProbability) : items(std::move(InItems)), probability(InProbability) {}
     };
 
     /**
@@ -59,10 +58,10 @@ namespace rolldown
         std::vector<ItemPack> packs;
 
         // Construct without ItemPack vector
-        TierSpec(const std::string &name, const double probability) : name(name), probability(probability) {}
+        TierSpec(const std::string &InName, const double InProbability) : name(InName), probability(InProbability) {}
 
         // Construct with ItemPack vector
-        TierSpec(const std::string &name, const double probability, const std::vector<ItemPack> itemPacks) : name(name), probability(probability), packs(std::move(itemPacks)) {}
+        TierSpec(const std::string &InName, const double InProbability, const std::vector<ItemPack> InItemPacks) : name(InName), probability(InProbability), packs(std::move(InItemPacks)) {}
     };
 
     // /**
