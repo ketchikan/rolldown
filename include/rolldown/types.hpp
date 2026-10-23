@@ -38,10 +38,10 @@ namespace rolldown
         double probability;
 
         // Initialize with a default probability of 100%
-        ItemPack(const std::vector<Item> InItems) : items(std::move(InItems)), probability(100.0) {}
+        ItemPack(std::vector<Item> InItems) : items(std::move(InItems)), probability(100.0) {}
 
         // Initialize with a specified probability
-        ItemPack(const std::vector<Item> InItems, const double InProbability) : items(std::move(InItems)), probability(InProbability) {}
+        ItemPack(std::vector<Item> InItems, const double InProbability) : items(std::move(InItems)), probability(InProbability) {}
     };
 
     /**
@@ -61,7 +61,7 @@ namespace rolldown
         TierSpec(const std::string &InName, const double InProbability) : name(InName), probability(InProbability) {}
 
         // Construct with ItemPack vector
-        TierSpec(const std::string &InName, const double InProbability, const std::vector<ItemPack> InItemPacks) : name(InName), probability(InProbability), packs(std::move(InItemPacks)) {}
+        TierSpec(const std::string &InName, const double InProbability, std::vector<ItemPack> InItemPacks) : name(InName), probability(InProbability), packs(std::move(InItemPacks)) {}
     };
 
     // /**

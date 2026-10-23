@@ -30,7 +30,8 @@ namespace rolldown
         template <class Rng>
         uint32_t boundedRandom(Rng &rng, uint32_t range)
         {
-            static_assert(Rng::min() == 0 && Rng::max() == std::numeric_limits<uint64_t>::max(),
+            // Minor fix to stop macro expansion for <windows.h> (the nested parenthesis on min and max)
+            static_assert((Rng::min)() == 0 && (Rng::max)() == (std::numeric_limits<uint64_t>::max)(),
                           "rolldown needs a generator that produces full 64-bit values, e.g. std::mt19937_64");
 
             uint64_t m = (rng() >> 32) * uint64_t{range}; // top 32 random bits x range

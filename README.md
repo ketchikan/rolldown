@@ -14,6 +14,11 @@ actions, procedural generation, or any time one option must be picked from
 many by probability. **You set the probabilities, and Rolldown picks as many
 as you need.**
 
+GAME ENGINE INTEGRATION:
+[Unreal Engine](#unreal-engine)
+[Unity](#unity)
+[Godot](#godot)
+
 </div>
 
 ## Quick start
@@ -86,6 +91,27 @@ for (const Item &item : drop.items)
 > 💡 A complete, runnable version of this code is in
 > [`examples/json_loader/main.cpp`][example_json_url].
 
+## Features
+
+- **Exact percentages.** Chances are stored as integers, not floating-point
+  numbers, so a 2.1% drop is exactly 2.1%, and the "adds up to 100%" checks
+  are exact.
+- **Validated before use.** Mistakes in a table are caught at load time, with
+  an error that names the tier at fault, not in the middle of a game.
+- **Bring your own random number generator.** Pass in any 64-bit generator
+  (`std::mt19937_64`, xoshiro, PCG, your engine's own). Seed it and every drop
+  is replayable, which is useful for save files, replays, multiplayer, and tests.
+- **No exceptions.** Errors come back as values. Rolldown works in projects
+  built with exceptions turned off (`-fno-exceptions`, which Unreal uses by
+  default).
+- **No dependencies, no file format.** Rolldown takes plain C++ structs. Load
+  them from JSON, a database, a level editor, or build them in code.
+- **Fast.** One roll is a branchless binary search over the table:
+  _O(log n)_, about 4–7 ns on a modern CPU for typical tables (see
+  [benchmarks](#tests-and-benchmarks)).
+- **Statistically tested.** The test suite rolls each test table 10 million
+  times and checks every pack's drop rate against its configured chance.
+
 ## How probabilities work
 
 A **table** holds **tiers**. Each tier holds **packs**. Each pack holds zero or
@@ -118,27 +144,6 @@ items (a "nothing drops" result).
 > ❗️ Chances have **two decimal places** of precision (`3.5` and `33.33` are
 > fine). Extra decimals are rounded, so three packs of `33.333` add up to
 > `99.99` and the tier is rejected. Use `33.33`, `33.33`, `33.34` instead.
-
-## Features
-
-- **Exact percentages.** Chances are stored as integers, not floating-point
-  numbers, so a 2.1% drop is exactly 2.1%, and the "adds up to 100%" checks
-  are exact.
-- **Validated before use.** Mistakes in a table are caught at load time, with
-  an error that names the tier at fault, not in the middle of a game.
-- **Bring your own random number generator.** Pass in any 64-bit generator
-  (`std::mt19937_64`, xoshiro, PCG, your engine's own). Seed it and every drop
-  is replayable, which is useful for save files, replays, multiplayer, and tests.
-- **No exceptions.** Errors come back as values. Rolldown works in projects
-  built with exceptions turned off (`-fno-exceptions`, which Unreal uses by
-  default).
-- **No dependencies, no file format.** Rolldown takes plain C++ structs. Load
-  them from JSON, a database, a level editor, or build them in code.
-- **Fast.** One roll is a branchless binary search over the table:
-  _O(log n)_, about 4–7 ns on a modern CPU for typical tables (see
-  [benchmarks](#tests-and-benchmarks)).
-- **Statistically tested.** The test suite rolls each test table 10 million
-  times and checks every pack's drop rate against its configured chance.
 
 ## API
 
@@ -238,6 +243,18 @@ The JSON shape it reads:
   give the same drops every time.
 - **Threads.** Rolling only reads a `DropTable`, so many threads can share one
   table. A generator is not safe to share: give each thread its own.
+
+### Unreal Engine
+
+Support for Unreal Engine is planned and in progress.
+
+### Unity
+
+Support for Unity is planned and in progress.
+
+### Godot
+
+Support for Godot is planned and in progress.
 
 ## How it works
 
@@ -339,6 +356,9 @@ buffer that you reuse every frame, and a batch of rolls needs no allocation.
 
 ## Roadmap
 
+- **Unreal Engine Support:** Add code examples and support for Unreal Engine integration.
+- **Unity Support:** Add code examples and support for Unity integration.
+- **Godot Support:** Add code examples and support for Godot integration.
 - **Pity system:** guarantee a drop after a set number of rolls without it.
   Optional, for each item.
 - **Tierless tables:** set each pack's overall chance directly, with no tiers.
