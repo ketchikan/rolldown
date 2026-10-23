@@ -19,7 +19,7 @@ namespace rolldown_json
     using rolldown::Item;
     using rolldown::ItemPack;
     using rolldown::TierSpec;
-    /*
+    /**
     @enum LoadError
 
     @brief Problems with the file or with the shape of the JSON.
@@ -35,7 +35,7 @@ namespace rolldown_json
         WrongType,    // A field is there, but has the wrong type (for example, "probability": "3.5")
     };
 
-    /*
+    /**
     @struct LoadResult
 
     @brief The loaded table specs, or the first problem found.
@@ -51,7 +51,7 @@ namespace rolldown_json
         explicit operator bool() const { return error == LoadError::None; }
     };
 
-    /*
+    /**
     @fn toString
 
     @brief Convert a `LoadError` value to a string to output error messages.
@@ -110,7 +110,7 @@ namespace rolldown_json
             return false;
         }
 
-        /*
+        /**
         @fn getField
 
         @brief Find `key` in `obj` and check its type. Nothing here can throw.
@@ -221,7 +221,7 @@ namespace rolldown_json
         }
     }
 
-    /*
+    /**
     @fn parseTables
 
     @brief Convert JSON that is already in memory to table specs. Use this if your game already parsed the JSON,
@@ -255,7 +255,7 @@ namespace rolldown_json
         return r;
     }
 
-    /*
+    /**
     @fn loadTablesFromJson
 
     @brief Read a JSON file and convert it to table specs. Comments (line and block) in the file are permitted.

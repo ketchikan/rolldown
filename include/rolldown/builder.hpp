@@ -11,7 +11,7 @@ namespace rolldown
 {
     namespace detail
     {
-        /*
+        /**
         @fn convertRateToRange
 
         @brief Converting a double to a scaled integer. Ex: 5.5 -> 550, 24.5 -> 2450
@@ -28,7 +28,7 @@ namespace rolldown
         }
     }
 
-    /*
+    /**
     @enum BuildError
 
     @brief Errors describing the invalid states that the defined tier or item probabilities can be found in.
@@ -44,7 +44,7 @@ namespace rolldown
         TooPrecise,
     };
 
-    /*
+    /**
     @struct BuildResult
 
     @brief Contains the `DropTable` and relevant errors resulting from a build attempt of a table.
@@ -59,7 +59,7 @@ namespace rolldown
         explicit operator bool() const { return error == BuildError::None; }
     };
 
-    /*
+    /**
     @fn toString
 
     @brief Convert a `BuildError` value to a string to output error messages.
@@ -90,7 +90,7 @@ namespace rolldown
         return "Unknown error."; // Moved out of the default because if I later add a new error type to the enum then it will throw an error through the compiler, which is handy.
     }
 
-    /*
+    /**
     @fn buildDropTable
 
     @brief Validate the structure and probabilities found in `DropTableSpec` objects and convert them to `BuildResult` objects.

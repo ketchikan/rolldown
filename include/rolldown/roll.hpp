@@ -17,7 +17,7 @@ namespace rolldown
     namespace detail
     {
 
-        /*
+        /**
         @fn boundedRandom
 
         @brief An implementation of Lemire's method of random number generation from 0 to a specified upper limit.
@@ -60,7 +60,7 @@ namespace rolldown
         };
     }
 
-    /*
+    /**
     @fn rollIndex
 
     @brief Used to randomly select one index utilizing generated cutoffs, which follows the probability supported by the generated cutoffs.
@@ -93,7 +93,7 @@ namespace rolldown
         return static_cast<size_t>(base - cutoffs.data()) + (*base <= roll);
     }
 
-    /*
+    /**
     @fn roll
 
     @brief After providing a `DropTable` and a 64-bit RNG method, receive back a randomly selected `ItemPack` object from the `DropTable`.
@@ -109,7 +109,7 @@ namespace rolldown
         return table.packs()[rollIndex(table, rng)];
     }
 
-    /*
+    /**
     @fn rollIndexes
 
     @brief Roll `count` indexes and write them through `out`. No allocation: reuse your own buffer.
@@ -144,7 +144,7 @@ namespace rolldown
         return out;
     }
 
-    /*
+    /**
     @fn rollIndexes
 
     @brief Roll `count` indexes into a new std::vector.

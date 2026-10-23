@@ -15,7 +15,7 @@ namespace rolldown
         constexpr uint64_t TOTAL = ONE_HUNDRED_PERCENT * ONE_HUNDRED_PERCENT; // 100'000'000
     }
 
-    /*
+    /**
     @struct Item
 
     @brief Represents a single item, storing an ID and a name.
@@ -28,7 +28,7 @@ namespace rolldown
         Item(const uint64_t id) : id(id) {}
     };
 
-    /*
+    /**
     @struct ItemPack
 
     @brief A collection of 1+ `Item` objects. Stores the `Item` objects in a vector, and a probability of the pack being selected.
@@ -45,7 +45,7 @@ namespace rolldown
         ItemPack(const std::vector<Item> items, const double probability) : items(std::move(items)), probability(probability) {}
     };
 
-    /*
+    /**
     @struct TierSpec
 
     @brief A description of a single Tier inside a drop table.
@@ -65,7 +65,7 @@ namespace rolldown
         TierSpec(const std::string &name, const double probability, const std::vector<ItemPack> itemPacks) : name(name), probability(probability), packs(std::move(itemPacks)) {}
     };
 
-    // /*
+    // /**
     // @struct NumberDrops
 
     // @brief Describe the number of rolls to be performed for dropping random items and the probability of that number of rolls.
@@ -76,7 +76,7 @@ namespace rolldown
     //     float probability;
     // };
 
-    /*
+    /**
     @struct DropTableSpec
 
     @brief A collection of `TierSpec` objects that comprise a single item drop table.
@@ -89,7 +89,7 @@ namespace rolldown
     };
 
     struct BuildResult; // forward declaration; defined in builder.hpp
-    /*
+    /**
     @class DropTable
 
     @brief A validated table, ready to roll. Only buildDropTable can create a filled one.
