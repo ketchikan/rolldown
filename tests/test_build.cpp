@@ -1,4 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
+#include <random>
 
 #include "rolldown/rolldown.hpp"
 #include "spec_helpers.hpp"
@@ -32,6 +33,7 @@ TEST_CASE("invalid specs report the right error and tier", "[build]")
         CHECK(result.error == BuildError::EmptyTier);
         CHECK(result.tierIndex == 1);
     }
+
     SECTION("a negative pack probability")
     {
         const auto result = buildDropTable(makeSpec({{100, {-10, 110}}}));
@@ -72,6 +74,19 @@ TEST_CASE("invalid specs report the right error and tier", "[build]")
         const auto result = buildDropTable(makeSpec({{99.999, {100}}, {0.001, {100}}}));
         CHECK(result.error == BuildError::TooPrecise);
     }
+}
+
+TEST_CASE("a batch gives the same rolls as single calls", "[roll]")
+{
+    const auto built = buildDropTable(makeSpec({{100, {25, 75}}}));
+    REQUIRE(built);
+    std::mt19937_64 a{42}, b{42};
+
+    std::vector<size_t> single;
+    for (int i = 0; i < 1000; ++i)
+        single.push_back(rolldown::rollIndex(built.table, a));
+
+    CHECK(rolldown::rollIndexes(built.table, b, 1000) == single);
 }
 
 TEST_CASE("the loader reads a table file", "[loader]")

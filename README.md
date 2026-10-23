@@ -143,12 +143,14 @@ items (a "nothing drops" result).
 
 ### Functions
 
-| Function                | Returns            | Description                                                                                                                                       | When to call  |
-| ----------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| `buildDropTable(spec)`  | `BuildResult`      | Checks a `DropTableSpec` against the rules above and builds a `DropTable`.                                                                        | Once, at load |
-| `roll(table, rng)`      | `const ItemPack &` | Picks one pack.                                                                                                                                   | Each drop     |
-| `rollIndex(table, rng)` | `size_t`           | Picks one pack and returns its index in `table.packs()`. Useful when the index _is_ the answer, for example an action number in machine learning. | Each drop     |
-| `toString(error)`       | `const char *`     | A readable message for a `BuildError`.                                                                                                            | On an error   |
+| Function                                   | Returns               | Description                                                                                                                                                                         | When to call                     |
+| ------------------------------------------ | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| `buildDropTable(spec)`                     | `BuildResult`         | Checks a `DropTableSpec` against the rules above and builds a `DropTable`.                                                                                                          | Once, at load                    |
+| `rollIndexes(table, rng, count, iterator)` | `iterator`            | Picks a selected number of indexes into `table.packs()`. Useful for selecting many random actions at once. Returns an iterator like a vector or array (matches the type passed in). | Once for many selections at once |
+| `rollIndexes(table, rng, count)`           | `std::vector<size_t>` | Picks a selected number of indexes into `table.packs()`. Useful for selecting many random actions at once. Returns a vector of `size_t` indexes.                                    | Once for many selections at once |
+| `roll(table, rng)`                         | `const ItemPack &`    | Picks one pack.                                                                                                                                                                     | Each drop                        |
+| `rollIndex(table, rng)`                    | `size_t`              | Picks one pack and returns its index in `table.packs()`. Useful when the index _is_ the answer, for example an action number in machine learning.                                   | Each drop                        |
+| `toString(error)`                          | `const char *`        | A readable message for a `BuildError`.                                                                                                                                              | On an error                      |
 
 `rng` can be any generator with the standard C++ generator interface that
 produces full 64-bit values. A 32-bit generator such as `std::mt19937` is

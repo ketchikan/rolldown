@@ -26,8 +26,6 @@ namespace rolldown
         // std::string name;
 
         Item(const uint64_t id) : id(id) {}
-
-    private:
     };
 
     /*
@@ -65,8 +63,6 @@ namespace rolldown
 
         // Construct with ItemPack vector
         TierSpec(const std::string &name, const double probability, const std::vector<ItemPack> itemPacks) : name(name), probability(probability), packs(std::move(itemPacks)) {}
-
-    private:
     };
 
     // /*

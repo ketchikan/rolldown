@@ -6,6 +6,8 @@
 #include <cstddef>
 #include <limits>
 #include <cassert>
+#include <type_traits>
+#include <utility>
 
 #include "types.hpp"
 
@@ -44,6 +46,18 @@ namespace rolldown
             }
             return static_cast<uint32_t>(m >> 32);
         }
+
+        // ITERATOR CHECKING
+        // True if `*out++ = size_t` compiles for It: exactly what rollIndexes does with it.
+        template <class It, class = void>
+        struct acceptsIndexes : std::false_type
+        {
+        };
+
+        template <class It>
+        struct acceptsIndexes<It, std::void_t<decltype(*std::declval<It &>()++ = std::declval<std::size_t>())>> : std::true_type
+        {
+        };
     }
 
     /*
@@ -86,11 +100,69 @@ namespace rolldown
 
     @param[in] table: a `DropTable` object
     @param[in] rng: any generator producing full 64-bit values works (std::mt19937_64, PCG64, xoshiro256**...)
+
+    @return `ItemPack`
     */
     template <class Rng>
     const ItemPack &roll(const DropTable &table, Rng &rng)
     {
         return table.packs()[rollIndex(table, rng)];
+    }
+
+    /*
+    @fn rollIndexes
+
+    @brief Return a specified number of randomized indexes. Useful if you know ahead of time a number that you will likely need.
+
+    @param[in] table: a `DropTable` object
+    @param[in] rng: any generator producing full 64-bit values works (std::mt19937_64, PCG64, xoshiro256**...)
+    @param[in] count: the number of indexes to randomly select.
+    @param[out] out Where to write the indexes. Must have room for `count` values, or grow as needed (for example, std::back_inserter).
+
+
+    @return Outputs the `out` iterator one past the last write.
+
+    @code{.cpp}
+    buffer.clear(); // reuse a vector each time
+    rolldown::rollIndexes(table, rng, 30, std::back_inserter(buffer)); // no allocation once it has grown
+
+    size_t fixed[16];
+    rolldown::rollIndexes(table, rng, 16, fixed); // a plain array, no heap at all
+    @endcode
+    */
+    template <class Rng, class OutputIt>
+    OutputIt rollIndexes(const DropTable &table, Rng &rng, size_t count, OutputIt out)
+    {
+        static_assert(detail::acceptsIndexes<OutputIt>::value,
+                      "rollIndexes: `out` must be an output iterator that accepts size_t, "
+                      "for example a pointer, container.begin(), or std::back_inserter(container)");
+
+        for (size_t i = 0; i < count; ++i)
+            *out++ = rollIndex(table, rng);
+        return out;
+    }
+
+    /*
+    @fn rollIndexes
+
+    @brief Return a specified number of randomized indexes. Useful if you know ahead of time a number that you will likely need.
+
+    @param[in] table: a `DropTable` object
+    @param[in] rng: any generator producing full 64-bit values works (std::mt19937_64, PCG64, xoshiro256**...)
+    @param[in] count: the number of indexes to randomly select.
+
+    @return `std::vector<size_t>` a vector of the randomly selected indexes
+
+    @code{.cpp}
+    auto picks = rolldown::rollIndexes(table, rng, 500); // Returns a new vector
+    @endcode
+    */
+    template <class Rng>
+    std::vector<size_t> rollIndexes(const DropTable &table, Rng &rng, size_t count)
+    {
+        std::vector<size_t> result(count);
+        rollIndexes(table, rng, count, result.begin());
+        return result;
     }
 
 } // namespace rolldown
