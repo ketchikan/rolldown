@@ -133,12 +133,16 @@ namespace rolldown
         }
 
         // Reserve vector space before we build
-        size_t numSpecs = spec.tiers.size();
-        r.table.packs_.reserve(numSpecs);
-        r.table.cutoffs_.reserve(numSpecs);
+        size_t numPacks = 0;
+        for (const auto &tier : spec.tiers)
+        {
+            numPacks += tier.packs.size();
+        }
+        r.table.packs_.reserve(numPacks);
+        r.table.cutoffs_.reserve(numPacks);
 
         // Iterate over the tiers
-        for (size_t t = 0; t < numSpecs; ++t)
+        for (size_t t = 0; t < spec.tiers.size(); ++t)
         {
             const TierSpec &tier = spec.tiers[t];
             // Validate that at least 1 item pack exists

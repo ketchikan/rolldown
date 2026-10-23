@@ -3,6 +3,7 @@
 
 #include <random>
 #include <string>
+#include <vector>
 
 #include "rolldown/rolldown.hpp"
 #include "spec_helpers.hpp"
@@ -38,4 +39,32 @@ TEST_CASE("roll vs rollIndex", "[benchmark]")
     const auto table = rolldown::buildDropTable(makeEvenSpec(100)).table;
     BENCHMARK("roll, 100 packs") { return &rolldown::roll(table, xo); };
     BENCHMARK("rollIndex, 100 packs") { return rolldown::rollIndex(table, xo); };
+}
+
+TEST_CASE("rollIndexes with iterator provided vs vector returned")
+{
+    XoshiroCpp::Xoshiro256PlusPlus xo{12345};
+    const auto table = rolldown::buildDropTable(makeEvenSpec(100)).table;
+
+    size_t loopOut[1000];
+    BENCHMARK("rollIndex in a loop, 100 packs, 1000 rolls")
+    {
+        for (size_t i = 0; i < 1000; ++i)
+            loopOut[i] = rolldown::rollIndex(table, xo);
+        return loopOut[999];
+    };
+
+    BENCHMARK("rollIndexes with returned vector, 100 packs, 1000 rolls") { return rolldown::rollIndexes(table, xo, 1000); };
+
+    size_t cStyle[1000];
+    BENCHMARK("rollIndexes with provided c-style array, 100 packs, 1000 rolls") { return rolldown::rollIndexes(table, xo, 1000, cStyle); };
+
+    std::vector<size_t> v;
+    v.reserve(1000);
+    BENCHMARK("rollIndexes with provided vector, 100 packs, 1000 rolls")
+    {
+        v.clear(); // capacity stays at 1000, so this measures reuse, not growth
+        rolldown::rollIndexes(table, xo, 1000, std::back_inserter(v));
+        return v.back();
+    };
 }

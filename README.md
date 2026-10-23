@@ -134,8 +134,9 @@ items (a "nothing drops" result).
   default).
 - **No dependencies, no file format.** Rolldown takes plain C++ structs. Load
   them from JSON, a database, a level editor, or build them in code.
-- **Fast.** One roll is a binary search over the table: _O(log n)_, about
-  5–8 ns on a modern CPU (see [benchmarks](#tests-and-benchmarks)).
+- **Fast.** One roll is a branchless binary search over the table:
+  _O(log n)_, about 4–7 ns on a modern CPU for typical tables (see
+  [benchmarks](#tests-and-benchmarks)).
 - **Statistically tested.** The test suite rolls each test table 10 million
   times and checks every pack's drop rate against its configured chance.
 
@@ -250,16 +251,12 @@ The JSON shape it reads:
    0 to 99,999,999 with
    [Lemire's nearly divisionless method][lemire_url]. A plain `rng() % n` is
    slightly biased towards smaller numbers. This method is not, and it is faster.
-4. **Binary search.** `std::upper_bound` finds the first cutoff above the
+4. **Binary search.** Uses a branchless binary search to find the first cutoff above the
    random number. That cutoff's pack is the result: _O(log n)_.
 5. **Cache-friendly layout.** The cutoffs are stored in their own array,
    separate from the packs (struct-of-arrays). The search reads only cutoffs,
-   and eight of them fit in one 64-byte cache line.
-6. **Portable 128-bit math.** Lemire's method needs a 64 × 64 → 128-bit
-   multiply. Rolldown uses `unsigned __int128` on GCC and Clang, the
-   `_umul128` / `__umulh` intrinsics on MSVC, and a portable fallback on
-   other compilers.
-7. **Protected once validated.** `DropTable` keeps its data private. Only
+   and sixteen of them fit in one 64-byte cache line.
+6. **Protected once validated.** `DropTable` keeps its data private. Only
    `buildDropTable` can fill it, so a table that passed validation cannot be
    changed into an invalid one.
 
@@ -292,19 +289,36 @@ ctest --test-dir build --output-on-failure   # run the tests
   5 standard deviations of its expected count. A `0%` pack must never drop. The
   generators use a fixed seed, so the result is the same on every run.
 
-**Benchmarks** (Apple M2 Pro, Apple Clang 16, Release build):
+**Benchmarks** (Apple M2 Pro, Apple Clang 16, Release build, measured with
+Catch2):
 
 | Time for each roll | `std::mt19937_64` | xoshiro256++ |
 | ------------------ | ----------------- | ------------ |
 | Generator only     | 4.5 ns            | 2.8 ns       |
-| Full `rollIndex`   | 7.6 ns            | 4.6 ns       |
+| Full `rollIndex`   | 6.7 ns            | 3.8 ns       |
 
-| Packs in the table        | 2      | 8      | 32     | 128    | 1000    |
-| ------------------------- | ------ | ------ | ------ | ------ | ------- |
-| `rollIndex`, xoshiro256++ | 3.4 ns | 6.8 ns | 6.4 ns | 7.6 ns | 12.0 ns |
+Most of each roll is the random number generator itself. A faster generator
+makes the full roll faster, with no change to Rolldown.
 
-About half of each roll is the random number generator itself. A faster
-generator makes the full roll faster, with no change to Rolldown.
+| Packs in the table                       | 2      | 8      | 32     | 128    | 1000    |
+| ---------------------------------------- | ------ | ------ | ------ | ------ | ------- |
+| `rollIndex`, branchless search (current) | 3.3 ns | 3.9 ns | 4.7 ns | 6.6 ns | 9.3 ns  |
+| `rollIndex`, `std::upper_bound` (v0.1)   | 3.4 ns | 6.8 ns | 6.4 ns | 7.6 ns | 12.0 ns |
+
+The search compares with a conditional select instead of a branch. A branch on
+a random value is mispredicted about half of the time, and that cost was larger
+than the rest of the roll for small tables.
+
+| 1000 rolls, 100 packs, xoshiro256++                  | Total  | For each roll |
+| ---------------------------------------------------- | ------ | ------------- |
+| `rollIndex` in a loop                                | 5.7 µs | 5.7 ns        |
+| `rollIndexes` into a plain array                     | 6.1 µs | 6.1 ns        |
+| `rollIndexes`, returns a new vector                  | 6.1 µs | 6.1 ns        |
+| `rollIndexes` into a reused vector (`back_inserter`) | 6.4 µs | 6.4 ns        |
+
+All four are the same within measurement noise (±0.2–0.7 µs). `rollIndexes`
+is not faster than a loop. Its purpose is control of memory: write into a
+buffer that you reuse every frame, and a batch of rolls needs no allocation.
 
 ## Design decisions
 
