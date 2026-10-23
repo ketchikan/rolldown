@@ -2,8 +2,8 @@
 
 #include <cmath>
 #include <cstdint>
-#include <iostream>
 #include <vector>
+#include <cassert>
 
 #include "types.hpp"
 
@@ -19,11 +19,12 @@ namespace rolldown
         @param[in] rate: a double representing the rate to be converted.
 
         @return uint64_t an integer representing the scaled input.
-         */
-        inline uint64_t convertRateToRange(const double &rate)
+        */
+        inline uint32_t convertRateToRange(double rate)
         {
-            // Precondition: rate >= 0 (checked by buildDropTable), so the cast can't wrap
-            return static_cast<uint64_t>(std::llround(rate * PERCENT_SCALE));
+            // Precondition: 0 <= rate <= 100 (checked by buildDropTable), so the result is 0..10'000 and fits
+            assert(rate >= 0.0 && rate <= 100.0);
+            return static_cast<uint32_t>(std::llround(rate * PERCENT_SCALE));
         }
     }
 
@@ -123,7 +124,7 @@ namespace rolldown
         };
 
         uint64_t currentCutoff = 0;
-        uint64_t tierTotal = 0;
+        uint32_t tierTotal = 0;
 
         // Validate that at least 1 tier exists
         if (spec.tiers.empty())
@@ -131,8 +132,13 @@ namespace rolldown
             return fail(BuildError::NoTiers);
         }
 
+        // Reserve vector space before we build
+        size_t numSpecs = spec.tiers.size();
+        r.table.packs_.reserve(numSpecs);
+        r.table.cutoffs_.reserve(numSpecs);
+
         // Iterate over the tiers
-        for (size_t t = 0; t < spec.tiers.size(); ++t)
+        for (size_t t = 0; t < numSpecs; ++t)
         {
             const TierSpec &tier = spec.tiers[t];
             // Validate that at least 1 item pack exists
@@ -154,10 +160,10 @@ namespace rolldown
             }
 
             // Convert tier probability
-            uint64_t tierConvertedProb = detail::convertRateToRange(tier.probability);
+            uint32_t tierConvertedProb = detail::convertRateToRange(tier.probability);
             tierTotal += tierConvertedProb;
 
-            uint64_t itemProbSum = 0;
+            uint32_t itemProbSum = 0;
             for (const auto &pack : tier.packs)
             {
                 // Validate that the probability is within the range
@@ -173,14 +179,14 @@ namespace rolldown
                 }
 
                 // Conver item probability
-                uint64_t itemConvertedProb = detail::convertRateToRange(pack.probability);
+                uint32_t itemConvertedProb = detail::convertRateToRange(pack.probability);
                 itemProbSum += itemConvertedProb;
 
                 // Calculate the cutoff
-                uint64_t itemRange = tierConvertedProb * itemConvertedProb; // This used to be a function but that's dumb
+                uint32_t itemRange = tierConvertedProb * itemConvertedProb; // This used to be a function but that's dumb
                 currentCutoff += itemRange;
                 r.table.packs_.push_back(pack);
-                r.table.cutoffs_.push_back(currentCutoff);
+                r.table.cutoffs_.push_back(static_cast<uint32_t>(currentCutoff));
             }
             if (itemProbSum != detail::ONE_HUNDRED_PERCENT)
             {

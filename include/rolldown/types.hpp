@@ -15,9 +15,6 @@ namespace rolldown
         constexpr uint64_t TOTAL = ONE_HUNDRED_PERCENT * ONE_HUNDRED_PERCENT; // 100'000'000
     }
 
-    // TODO for now I'm making these Vectors, but that is going to be very inefficient to use at scale.
-    // - If I determine a maximum size for each of these, I can declare those sizes and use that instead in a cstyle array or a c++ style array
-
     /*
     @struct Item
 
@@ -28,7 +25,7 @@ namespace rolldown
         uint64_t id; // Just generalizing for now, this should be sized like how we size ENUM's
         // std::string name;
 
-        Item(const uint64_t &id) : id(id) {}
+        Item(const uint64_t id) : id(id) {}
 
     private:
     };
@@ -44,10 +41,10 @@ namespace rolldown
         double probability;
 
         // Initialize with a default probability of 100%
-        ItemPack(const std::vector<Item> &items) : items(items), probability(100.0) {}
+        ItemPack(const std::vector<Item> items) : items(std::move(items)), probability(100.0) {}
 
         // Initialize with a specified probability
-        ItemPack(const std::vector<Item> &items, const double &probability) : items(items), probability(probability) {}
+        ItemPack(const std::vector<Item> items, const double probability) : items(std::move(items)), probability(probability) {}
     };
 
     /*
@@ -64,10 +61,10 @@ namespace rolldown
         std::vector<ItemPack> packs;
 
         // Construct without ItemPack vector
-        TierSpec(const std::string &name, const double &probability) : name(name), probability(probability) {}
+        TierSpec(const std::string &name, const double probability) : name(name), probability(probability) {}
 
         // Construct with ItemPack vector
-        TierSpec(const std::string &name, const double &probability, const std::vector<ItemPack> &itemPacks) : name(name), probability(probability), packs(itemPacks) {}
+        TierSpec(const std::string &name, const double probability, const std::vector<ItemPack> itemPacks) : name(name), probability(probability), packs(std::move(itemPacks)) {}
 
     private:
     };
@@ -111,7 +108,7 @@ namespace rolldown
 
     private:
         std::vector<ItemPack> packs_;   // every pack from every tier, in roll order
-        std::vector<uint64_t> cutoffs_; // cutoffs_[i] is the upper roll limit of packs_[i]
+        std::vector<uint32_t> cutoffs_; // cutoffs_[i] is the upper roll limit of packs_[i]
 
         // The only code allowed to write to (or depend on) the private members
         friend BuildResult buildDropTable(const DropTableSpec &spec);

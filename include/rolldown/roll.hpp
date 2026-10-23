@@ -9,49 +9,11 @@
 
 #include "types.hpp"
 
-// Determine whether MSVC is the compiler being used or not. If it is, we need an additional include.
-#if defined(_MSC_VER) && !defined(__SIZEOF_INT128__)
-#include <intrin.h> // _umul128 / __umulh
-#endif
-
 namespace rolldown
 {
 
     namespace detail
     {
-        /*
-        @fn mul128
-
-        @brief A full 64x64 -> 128-bit multiply. Returns the low 64 bits, and writes the high 64 bits to 'high'.
-
-        @param[in] a the first 64-bit number to be multiplied
-        @param[in] b the second 64-bit number to be multiplied
-        @param[out] high stores the high 64 bits of the result
-
-        @return uint64_t the low 64 bits from the result
-
-        @note This was written to help boundedRandom work with GCC, Clang, and MSVC, utilizing preprocessor logic to determine the compiler support for __int128 objects and adjust accordingly.
-        */
-        inline uint64_t mul128(uint64_t a, uint64_t b, uint64_t &high)
-        {
-#if defined(__SIZEOF_INT128__) // GCC, Clang, clang-cl
-            const unsigned __int128 m = static_cast<unsigned __int128>(a) * b;
-            high = static_cast<uint64_t>(m >> 64);
-            return static_cast<uint64_t>(m);
-#elif defined(_MSC_VER) && defined(_M_X64)   // MSVC on x64
-            return _umul128(a, b, &high);
-#elif defined(_MSC_VER) && defined(_M_ARM64) // MSVC on ARM64
-            high = __umulh(a, b);
-            return a * b;
-#else                                        // Anything else: build it from four 32x32 multiplies
-            const uint64_t aLo = a & 0xFFFFFFFF, aHi = a >> 32;
-            const uint64_t bLo = b & 0xFFFFFFFF, bHi = b >> 32;
-            const uint64_t ll = aLo * bLo, lh = aLo * bHi, hl = aHi * bLo, hh = aHi * bHi;
-            const uint64_t mid = (ll >> 32) + (lh & 0xFFFFFFFF) + (hl & 0xFFFFFFFF);
-            high = hh + (lh >> 32) + (hl >> 32) + (mid >> 32);
-            return (mid << 32) | (ll & 0xFFFFFFFF);
-#endif
-        }
 
         /*
         @fn boundedRandom
@@ -61,28 +23,26 @@ namespace rolldown
         @param[in] rng Any generator producing full 64-bit values works (std::mt19937_64, PCG64, xoshiro256**...)
         @param[in] range an integer representing the upper limit that can be generated.
 
-        @return `uint64_t` the randomly selected integer.
+        @return `uint32_t` the randomly selected integer.
          */
         template <class Rng>
-        uint64_t boundedRandom(Rng &rng, uint64_t range)
+        uint32_t boundedRandom(Rng &rng, uint32_t range)
         {
             static_assert(Rng::min() == 0 && Rng::max() == std::numeric_limits<uint64_t>::max(),
                           "rolldown needs a generator that produces full 64-bit values, e.g. std::mt19937_64");
 
-            // Using Lemire's method
-            uint64_t x = rng();
-            uint64_t high;
-            uint64_t low = mul128(x, range, high);
-            if (low < range) // rare case: check for the biased region
+            uint64_t m = (rng() >> 32) * uint64_t{range}; // top 32 random bits x range
+            uint32_t low = static_cast<uint32_t>(m);
+            if (low < range) // ~2% of rolls: the result might be in the biased region
             {
-                const uint64_t threshold = (0 - range) % range;
+                const uint32_t threshold = (0u - range) % range; // = 2^32 mod range: the values to reject
                 while (low < threshold)
                 {
-                    x = rng();
-                    low = mul128(x, range, high);
+                    m = (rng() >> 32) * uint64_t{range};
+                    low = static_cast<uint32_t>(m);
                 }
             }
-            return high;
+            return static_cast<uint32_t>(m >> 32);
         }
     }
 
@@ -102,13 +62,13 @@ namespace rolldown
         assert(table.size() > 0 && "rollIndex called on an empty DropTable; check BuildResult first");
 
         // Get a random number from [0, TOTAL-1)
-        const uint64_t roll = detail::boundedRandom(rng, detail::TOTAL);
-        const std::vector<uint64_t> &cutoffs = table.cutoffs_;
+        const uint32_t roll = detail::boundedRandom(rng, detail::TOTAL);
+        const std::vector<uint32_t> &cutoffs = table.cutoffs_;
 
         // First cutoff strictly greater than the roll is the item we landed in
         // This is now O(log n) instead of O(n)
 
-        const uint64_t *base = cutoffs.data(); // TODO change to uint32_t
+        const uint32_t *base = cutoffs.data();
         size_t len = cutoffs.size();
         while (len > 1)
         {
