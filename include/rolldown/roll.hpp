@@ -112,7 +112,7 @@ namespace rolldown
     /*
     @fn rollIndexes
 
-    @brief Return a specified number of randomized indexes. Useful if you know ahead of time a number that you will likely need.
+    @brief Roll `count` indexes and write them through `out`. No allocation: reuse your own buffer.
 
     @param[in] table: a `DropTable` object
     @param[in] rng: any generator producing full 64-bit values works (std::mt19937_64, PCG64, xoshiro256**...)
@@ -129,6 +129,8 @@ namespace rolldown
     size_t fixed[16];
     rolldown::rollIndexes(table, rng, 16, fixed); // a plain array, no heap at all
     @endcode
+
+    See rollIndexes(table, rng, count) to get a new std::vector instead.
     */
     template <class Rng, class OutputIt>
     OutputIt rollIndexes(const DropTable &table, Rng &rng, size_t count, OutputIt out)
@@ -145,7 +147,7 @@ namespace rolldown
     /*
     @fn rollIndexes
 
-    @brief Return a specified number of randomized indexes. Useful if you know ahead of time a number that you will likely need.
+    @brief Roll `count` indexes into a new std::vector.
 
     @param[in] table: a `DropTable` object
     @param[in] rng: any generator producing full 64-bit values works (std::mt19937_64, PCG64, xoshiro256**...)
@@ -156,6 +158,8 @@ namespace rolldown
     @code{.cpp}
     auto picks = rolldown::rollIndexes(table, rng, 500); // Returns a new vector
     @endcode
+
+    See rollIndexes(table, rng, count, out) to write into your own buffer with no allocation.
     */
     template <class Rng>
     std::vector<size_t> rollIndexes(const DropTable &table, Rng &rng, size_t count)
